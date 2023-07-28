@@ -34,6 +34,8 @@ def get_card_list(page, search_query=None):
                 metadata = get_card_metadata(card_id)
                 if 'author:' in search_query and search_query.split(':')[-1].lower() in metadata['fullPath'].split('/')[0].lower():
                     cards.append(create_card_entry(metadata))
+                elif 'tag:' in search_query and search_query.split(':')[-1].lower() in [tag.lower() for tag in metadata['topics']]:
+                    cards.append(create_card_entry(metadata))
                 elif metadata and (search_query.lower() in metadata['name'].lower() or search_query.lower() in metadata['tagline'].lower() or search_query.lower() in metadata['description'].lower() or search_query.lower() in ' '.join(metadata['topics']).lower()):
                     cards.append(create_card_entry(metadata))
     else:
@@ -47,7 +49,6 @@ def get_card_list(page, search_query=None):
                     cards.append(create_card_entry(metadata))
 
     return cards
-
 
 @app.route('/static/<path:filename>', methods=['GET'])
 def image(filename):

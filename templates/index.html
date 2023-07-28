@@ -201,7 +201,7 @@
                         {{ highlighted_description|safe }}
                     </p>
                     <br>
-                    <p><i>Tags: {% for topic in card.topics %}<a href='?search_query={{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                    <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.image_path }}', '{{ card.name }}')">Download</button>
                 </div>
@@ -217,7 +217,7 @@
                     <br>
                     <p id="descr">{{ card.description }} <b> {{ card.tagline }}</b></p>
                     <br>
-                    <p><i>Tags: {% for topic in card.topics %}<a href='?search_query={{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                    <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.image_path }}', '{{ card.name }}')">Download</button>
                 </div>
@@ -285,17 +285,40 @@
             const cardTitles = document.querySelectorAll('.card-content h3');
             const cardDescriptions = document.querySelectorAll('.card-content #descr');
 
+            const cleanedQuery = searchQuery.toLowerCase().startsWith('tag:')
+            ? searchQuery.slice(4).trim()
+            : searchQuery.toLowerCase().startsWith('author:')
+            ? searchQuery.slice(7).trim()
+            : searchQuery;
+
             for (const tag of cardTags) {
-                const regex = new RegExp(escapeRegExp(searchQuery), 'gi');
-                tag.innerHTML = tag.textContent.replace(regex, match => `<span style="background-color: ${highlightColor};">${match}</span>`);}
+                const regex = new RegExp(escapeRegExp(cleanedQuery), 'gi');
+                tag.innerHTML = tag.textContent.replace(
+                    regex,
+                    match =>
+                        `<span style="background-color: ${
+                            cleanedQuery === match.toLowerCase()
+                                ? '#a9a9a9a9'
+                                : highlightColor
+                        };">${match}</span>`
+                );
+            }
 
             for (const title of cardTitles) {
-                const regex = new RegExp(escapeRegExp(searchQuery), 'gi');
-                title.innerHTML = title.textContent.replace(regex, match => `<span style="background-color: ${highlightColor};">${match}</span>`);}
+                const regex = new RegExp(escapeRegExp(cleanedQuery), 'gi');
+                title.innerHTML = title.textContent.replace(
+                    regex,
+                    match => `<span style="background-color: ${highlightColor};">${match}</span>`
+                );
+            }
 
             for (const description of cardDescriptions) {
-                const regex = new RegExp(escapeRegExp(searchQuery), 'gi');
-                description.innerHTML = description.textContent.replace(regex, match => `<span style="background-color: ${highlightColor};">${match}</span>`);}
+                const regex = new RegExp(escapeRegExp(cleanedQuery), 'gi');
+                description.innerHTML = description.textContent.replace(
+                    regex,
+                    match => `<span style="background-color: ${highlightColor};">${match}</span>`
+                );
+            }
         }
 
         highlightSearchResults();
