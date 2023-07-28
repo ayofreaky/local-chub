@@ -14,13 +14,11 @@
             padding: 0;
         }
 
-        /* Light mode */
         body.light-mode {
             background-color: #ffffff;
             color: #000000;
         }
 
-        /* Dark mode */
         body.dark-mode {
             background-color: #222222;
             color: #ffffff;
@@ -36,7 +34,6 @@
             color: #808080;
         }
 
-        /* Common styles for card containers */
         .card-container {
             border: 1px solid #ccc;
             padding: 10px;
@@ -73,9 +70,6 @@
             justify-content: center; /* Center the cards on larger screens */
         }
 
-        /* .p #descr {
-            margin: 5px 0;
-        } */
         .pagination {
             text-align: center;
             margin: 20px;
@@ -96,27 +90,24 @@
 
         .download-btn {
             background-color: #a9a9a9a9;
-            /* color: black; */
             padding: 8px 24px;
             border: none;
             cursor: pointer;
             font-size: 14px;
-            /* margin-top: 5px; */
         }
 
-        /* Additional styles for the search bar container */
         .search-container {
             display: flex;
             align-items: center;
             margin-top: 20px;
             width: 100%;
-            max-width: 500px; /* Limit the width of the search bar container */
-            padding: 0 10px; /* Add some horizontal padding */
-            box-sizing: border-box; /* Include padding in the total width */
+            max-width: 500px;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         .search-container form {
-            flex: 1; /* Fill the remaining space in the container */
+            flex: 1;
             display: flex;
             align-items: center;
         }
@@ -125,8 +116,8 @@
         .search-container button {
             font-size: 18px;
             padding: 5px;
-            flex: 1; /* Fill the remaining space in the form */
-            min-width: 0; /* Reset the minimum width to allow shrinking */
+            flex: 1;
+            min-width: 0;
         }
 
         /* Media queries for responsiveness */
@@ -158,7 +149,6 @@
             }
         }
 
-        /* Dark mode toggle styling */
         .dark-mode-toggle {
             background-color: transparent;
             border: none;
@@ -173,7 +163,6 @@
             content: '🌓︎';
         }
 
-        /* Highlight color for dark mode */
         body.dark-mode .search-container input[type='text']::selection,
         body.dark-mode .search-container input[type='text']::-moz-selection {
             background-color: #a9a9a9a9;
@@ -186,7 +175,7 @@
 
     <div class='dark-mode-toggle' onclick='toggleDarkMode()'></div>
 
-    <form action="/" method="get" class="search-container">
+    <form action='/' method='get' class='search-container'>
         <input type='text' name='search_query' placeholder='Search cards...' value="{{ request.args.get('search_query', '') }}", autocomplete='off'>
         <button type='submit'>Search</button>
     </form>
@@ -205,7 +194,6 @@
                 <div class="card-content">
                     <h3>{{ card.name }}</h3>
                     <p id='descr'>
-                        <!-- {{ card.tagline }} -->
                         {% set search_query = request.args.get('search_query') %}
                         {% set highlighted_description = card.description + '\n' + card.tagline %}
                         {{ highlighted_description|safe }}
@@ -247,10 +235,8 @@
     {% endif %}
 
     <script>
-        // Check if the user preference is stored in Local Storage
         const darkModePref = localStorage.getItem('darkMode');
 
-        // Set initial mode based on the user preference
         if (darkModePref === 'true') {
             document.body.classList.add('dark-mode');
             document.body.classList.remove('light-mode');
@@ -261,7 +247,6 @@
             body.classList.toggle('dark-mode');
             body.classList.toggle('light-mode');
 
-            // Store the user preference in Local Storage
             const isDarkMode = body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDarkMode.toString());
         }
