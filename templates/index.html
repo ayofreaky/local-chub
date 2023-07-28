@@ -193,7 +193,7 @@
         {% if search_results %}
             {% for card in search_results %}
             <div class='card-container'>
-                <img src="{{ card.image_path }}" alt='{{ card.name }}' class='card-image'>
+                <img src="{{ card.imagePath }}" alt='{{ card.name }}' class='card-image'>
                 <div class="card-content">
                     <h3>{{ card.name }}</h3>
                     <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a></p>
@@ -206,14 +206,14 @@
                     <br>
                     <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     <br>
-                    <button class='download-btn' onclick="downloadImage('{{ card.image_path }}', '{{ card.name }}')">Download</button>
+                    <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
                 </div>
             </div>
             {% endfor %}
         {% else %}
             {% for card in cards %}
             <div class="card-container">
-                <img src='{{ card.image_path }}' alt='{{ card.name }}' class='card-image'>
+                <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
                 <div class="card-content">
                     <h3>{{ card.name }}</h3>
                     <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a></p>
@@ -222,7 +222,7 @@
                     <br>
                     <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     <br>
-                    <button class='download-btn' onclick="downloadImage('{{ card.image_path }}', '{{ card.name }}')">Download</button>
+                    <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
                 </div>
             </div>
             {% endfor %}
@@ -235,9 +235,9 @@
             {% set next_page = 2 if page is none else page + 1 %}
             {% if page is not none and page > 1 %}
                 {% set prev_page = page - 1 %}
-                <a href='?page={{ prev_page }}'>Previous</a>
+                <a href='?page={{ prev_page }}'><</a>
             {% endif %}
-            <a href='?page={{ next_page }}'>Next</a>
+            <a href='?page={{ next_page }}'>></a>
         </div>
     {% endif %}
 
