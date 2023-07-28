@@ -12,42 +12,42 @@ def get_card_metadata(card_id):
         metadata = json.load(f)
     return metadata
 
+def create_card_entry(metadata):
+    image_path = f'static/{metadata["id"]}.png'
+    return {
+        'author': metadata['fullPath'].split('/')[0],
+        'name': metadata['name'],
+        'tagline': metadata['tagline'],
+        'description': metadata['description'].replace("Creator's notes go here.", '\n'),
+        'topics': metadata['topics'],
+        'image_path': image_path
+    }
+
 def get_card_list(page, search_query=None):
     cards = []
-    subdirectories = os.listdir('static')
+    files = os.listdir('static')
 
     if search_query:
-        for subdirectory in subdirectories:
-            if subdirectory.endswith('.json'):
-                card_id = subdirectory.split('.')[0]
+        for file in files:
+            if file.endswith('.json'):
+                card_id = file.split('.')[0]
                 metadata = get_card_metadata(card_id)
-                if metadata and (search_query.lower() in metadata['name'].lower() or search_query.lower() in metadata['tagline'].lower() or search_query.lower() in metadata['description'].lower() or search_query.lower() in ' '.join(metadata['topics']).lower()):
-                    image_path = f'static/{card_id}.png'
-                    cards.append({
-                        'name': metadata['name'],
-                        'tagline': metadata['tagline'],
-                        'description': metadata['description'].replace("Creator's notes go here.", '\n'),
-                        'topics': metadata['topics'],
-                        'image_path': image_path
-                    })
+                if 'author:' in search_query and search_query.split(':')[-1].lower() in metadata['fullPath'].split('/')[0].lower():
+                    cards.append(create_card_entry(metadata))
+                elif metadata and (search_query.lower() in metadata['name'].lower() or search_query.lower() in metadata['tagline'].lower() or search_query.lower() in metadata['description'].lower() or search_query.lower() in ' '.join(metadata['topics']).lower()):
+                    cards.append(create_card_entry(metadata))
     else:
         start_index = (page - 1) * CARDS_PER_PAGE
         end_index = start_index + CARDS_PER_PAGE
-        for subdirectory in subdirectories[start_index:end_index]:
-            if subdirectory.endswith('.json'):
-                card_id = subdirectory.split('.')[0]
+        for file in files[start_index:end_index]:
+            if file.endswith('.json'):
+                card_id = file.split('.')[0]
                 metadata = get_card_metadata(card_id)
                 if metadata:
-                    image_path = f'static/{card_id}.png'
-                    cards.append({
-                        'name': metadata['name'],
-                        'tagline': metadata['tagline'],
-                        'description': metadata['description'].replace("Creator's notes go here.", '\n'),
-                        'topics': metadata['topics'],
-                        'image_path': image_path
-                    })
+                    cards.append(create_card_entry(metadata))
 
     return cards
+
 
 @app.route('/static/<path:filename>', methods=['GET'])
 def image(filename):
