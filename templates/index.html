@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Local Chub</title>
+    <link rel='icon' type="image/x-icon" href="/static/favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Light mode */
+        body.light-mode {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            background-color: #222222;
+            color: #ffffff;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        a:hover {
+            color: #808080;
+        }
+
+        /* Common styles for card containers */
+        .card-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .card-image {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+        .card-content {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .card-content h3,
+        .card-content p {
+            margin: 8px 0;
+        }
+
+        /* Container for all cards */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Center the cards on larger screens */
+        }
+
+        /* .p #descr {
+            margin: 5px 0;
+        } */
+        .pagination {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            text-decoration: none;
+        }
+
+        .pagination .disabled {
+            pointer-events: none;
+            color: #999;
+        }
+
+        .download-btn {
+            background-color: #a9a9a9a9;
+            /* color: black; */
+            padding: 8px 24px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            /* margin-top: 5px; */
+        }
+
+        /* Additional styles for the search bar container */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px; /* Limit the width of the search bar container */
+            padding: 0 10px; /* Add some horizontal padding */
+            box-sizing: border-box; /* Include padding in the total width */
+        }
+
+        .search-container form {
+            flex: 1; /* Fill the remaining space in the container */
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input[type='text'],
+        .search-container button {
+            font-size: 18px;
+            padding: 5px;
+            flex: 1; /* Fill the remaining space in the form */
+            min-width: 0; /* Reset the minimum width to allow shrinking */
+        }
+
+        /* Media queries for responsiveness */
+
+        /* For smaller screens like mobile phones */
+        @media (max-width: 767px) {
+            .card-container {
+                width: 100%; /* Cards take full width on smaller screens */
+            }
+
+            .dark-mode-toggle {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                font-size: 24px;
+                cursor: pointer;
+            }
+        }
+
+        /* For larger screens like laptops and PCs */
+        @media (min-width: 768px) {
+            .search-container {
+                max-width: 800px; /* Limit the width of the search bar container for larger screens */
+            }
+
+            .dark-mode-toggle {
+                font-size: 24px;
+                cursor: pointer;
+            }
+        }
+
+        /* Dark mode toggle styling */
+        .dark-mode-toggle {
+            background-color: transparent;
+            border: none;
+            outline: none;
+        }
+
+        .dark-mode-toggle::selection {
+            background-color: transparent;
+        }
+
+        .dark-mode-toggle::before {
+            content: '🌓︎';
+        }
+
+        /* Highlight color for dark mode */
+        body.dark-mode .search-container input[type='text']::selection,
+        body.dark-mode .search-container input[type='text']::-moz-selection {
+            background-color: #a9a9a9a9;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class='light-mode'>
+    <h1><a href='/?page=1'>Local Chub</a></h1>
+
+    <div class='dark-mode-toggle' onclick='toggleDarkMode()'></div>
+
+    <form action="/" method="get" class="search-container">
+        <input type='text' name='search_query' placeholder='Search cards...' value="{{ request.args.get('search_query', '') }}", autocomplete='off'>
+        <button type='submit'>Search</button>
+    </form>
+
+    {% if search_results %}
+        <h2>Search Results ({{ search_results|length }} results)</h2>
+    {% else %}
+        <h2>All Cards</h2>
+    {% endif %}
+
+    <div class='cards-container'>
+        {% if search_results %}
+            {% for card in search_results %}
+            <div class='card-container'>
+                <img src="{{ card.image_path }}" alt='{{ card.name }}' class='card-image'>
+                <div class="card-content">
+                    <h3>{{ card.name }}</h3>
+                    <p id='descr'>
+                        <!-- {{ card.tagline }} -->
+                        {% set search_query = request.args.get('search_query') %}
+                        {% set highlighted_description = card.description + '\n' + card.tagline %}
+                        {{ highlighted_description|safe }}
+                    </p>
+                    <br>
+                    <p><i>Tags: {% for topic in card.topics %}<a href='?search_query={{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                    <br>
+                    <button class='download-btn' onclick="downloadImage('{{ card.image_path }}', '{{ card.name }}')">Download</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            {% for card in cards %}
+            <div class="card-container">
+                <img src='{{ card.image_path }}' alt='{{ card.name }}' class='card-image'>
+                <div class="card-content">
+                    <h3>{{ card.name }}</h3>
+                    <p id="descr">{{ card.description }} <b> {{ card.tagline }}</b></p>
+                    <br>
+                    <p><i>Tags: {% for topic in card.topics %}<a href='?search_query={{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                    <br>
+                    <button class='download-btn' onclick="downloadImage('{{ card.image_path }}', '{{ card.name }}')">Download</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {% if not search_results %}
+        <div class='pagination'>
+            {% set page = request.args.get('page')|int %}
+            {% set next_page = 2 if page is none else page + 1 %}
+            {% if page is not none and page > 1 %}
+                {% set prev_page = page - 1 %}
+                <a href='?page={{ prev_page }}'>Previous</a>
+            {% endif %}
+            <a href='?page={{ next_page }}'>Next</a>
+        </div>
+    {% endif %}
+
+    <script>
+        // Check if the user preference is stored in Local Storage
+        const darkModePref = localStorage.getItem('darkMode');
+
+        // Set initial mode based on the user preference
+        if (darkModePref === 'true') {
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            body.classList.toggle('light-mode');
+
+            // Store the user preference in Local Storage
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode.toString());
+        }
+
+        function downloadImage(imagePath, cardName) {
+            let cardId = imagePath.split('/').pop().split('.').shift();
+            let filename = cardName + '_' + cardId + '.png';
+            fetch(imagePath)
+                .then(response => response.blob())
+                .then(blob => {
+                    let newBlob = new Blob([blob], { type: 'image/png' });
+                    let url = URL.createObjectURL(newBlob);
+                    let link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Error fetching the image:', error);
+                });
+        }
+
+        function escapeRegExp(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function highlightSearchResults() {
+            const searchQuery = "{{ request.args.get('search_query') }}";
+            const highlightColor = '#a9a9a9a9';
+            const cardTags = document.querySelectorAll('.card-content i a');
+            const cardTitles = document.querySelectorAll('.card-content h3');
+            const cardDescriptions = document.querySelectorAll('.card-content #descr');
+
+            for (const tag of cardTags) {
+                const regex = new RegExp(escapeRegExp(searchQuery), 'gi');
+                tag.innerHTML = tag.textContent.replace(regex, match => `<span style="background-color: ${highlightColor};">${match}</span>`);}
+
+            for (const title of cardTitles) {
+                const regex = new RegExp(escapeRegExp(searchQuery), 'gi');
+                title.innerHTML = title.textContent.replace(regex, match => `<span style="background-color: ${highlightColor};">${match}</span>`);}
+
+            for (const description of cardDescriptions) {
+                const regex = new RegExp(escapeRegExp(searchQuery), 'gi');
+                description.innerHTML = description.textContent.replace(regex, match => `<span style="background-color: ${highlightColor};">${match}</span>`);}
+        }
+
+        highlightSearchResults();
+
+    </script>
+</body>
+</html>
