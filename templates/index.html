@@ -196,7 +196,7 @@
                 <img src="{{ card.imagePath }}" alt='{{ card.name }}' class='card-image'>
                 <div class="card-content">
                     <h3>{{ card.name }}</h3>
-                    <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a></p>
+                    <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id='descr'>
                         {% set search_query = request.args.get('search_query') %}
@@ -216,7 +216,7 @@
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
                 <div class="card-content">
                     <h3>{{ card.name }}</h3>
-                    <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a></p>
+                    <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id="descr">{{ card.description }} <b> {{ card.tagline }}</b></p>
                     <br>

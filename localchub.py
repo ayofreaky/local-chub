@@ -20,7 +20,8 @@ def createCardEntry(metadata):
         'tagline': metadata['tagline'],
         'description': metadata['description'].replace("Creator's notes go here.", '\n'),
         'topics': metadata['topics'],
-        'imagePath': imagePath
+        'imagePath': imagePath,
+        'tokenCount': metadata['nTokens']
     }
 
 def getCardList(page, search_query=None):
