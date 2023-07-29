@@ -278,8 +278,8 @@
         }
 
         function escapeRegExp(str) {
-            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
 
         function highlightSearchResults() {
             const searchQuery = "{{ request.args.get('search_query') }}";
@@ -294,31 +294,26 @@
             ? searchQuery.slice(7).trim()
             : searchQuery;
 
+            const tagQueries = cleanedQuery.split(',');
+            const tagRegex = new RegExp(tagQueries.map(escapeRegExp).join('|'), 'gi');
+
             for (const tag of cardTags) {
-                const regex = new RegExp(escapeRegExp(cleanedQuery), 'gi');
                 tag.innerHTML = tag.textContent.replace(
-                    regex,
-                    match =>
-                        `<span style="background-color: ${
-                            cleanedQuery === match.toLowerCase()
-                                ? '#a9a9a9a9'
-                                : highlightColor
-                        };">${match}</span>`
+                    tagRegex,
+                    match => `<span style="background-color: ${highlightColor};">${match}</span>`
                 );
             }
 
             for (const title of cardTitles) {
-                const regex = new RegExp(escapeRegExp(cleanedQuery), 'gi');
                 title.innerHTML = title.textContent.replace(
-                    regex,
+                    tagRegex,
                     match => `<span style="background-color: ${highlightColor};">${match}</span>`
                 );
             }
 
             for (const description of cardDescriptions) {
-                const regex = new RegExp(escapeRegExp(cleanedQuery), 'gi');
                 description.innerHTML = description.textContent.replace(
-                    regex,
+                    tagRegex,
                     match => `<span style="background-color: ${highlightColor};">${match}</span>`
                 );
             }

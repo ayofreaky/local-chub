@@ -36,7 +36,7 @@ def getCardList(page, search_query=None):
                     cards.append(createCardEntry(metadata))
                 elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split(':')[-1].lower().split(',')):
                     cards.append(createCardEntry(metadata))
-                elif metadata and (search_query.lower() in metadata['name'].lower() or search_query.lower() in metadata['tagline'].lower() or search_query.lower() in metadata['description'].lower() or search_query.lower() in ' '.join(metadata['topics']).lower()):
+                elif metadata and all(query.strip().lower() in metadata['name'].lower() or query.strip().lower() in metadata['tagline'].lower() or query.strip().lower() in metadata['description'].lower() or query.strip().lower() in [tag.lower() for tag in metadata['topics']] for query in search_query.lower().split(',')):
                     cards.append(createCardEntry(metadata))
     else:
         startIndex = (page - 1) * CARDS_PER_PAGE
