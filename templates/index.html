@@ -294,7 +294,7 @@
             ? searchQuery.slice(7).trim()
             : searchQuery;
 
-            const tagQueries = cleanedQuery.split(',');
+            const tagQueries = cleanedQuery.split(',').map(query => query.trim());
             const tagRegex = new RegExp(tagQueries.map(escapeRegExp).join('|'), 'gi');
 
             for (const tag of cardTags) {
