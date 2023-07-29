@@ -1,5 +1,6 @@
-import os, json
-from flask import Flask, render_template, request, send_from_directory
+import os, json, base64
+from flask import Flask, render_template, request, send_from_directory, jsonify
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -11,6 +12,11 @@ def getCardMetadata(cardId):
     with open(metadataFile) as f:
         metadata = json.load(f)
     return metadata
+
+def getPngInfo(cardId):
+    with open(f'static/{cardId}.png', 'rb') as f:
+        img = Image.open(f)
+        return json.loads(base64.b64decode(img.png.im_info['chara']).decode('utf-8'))
 
 def createCardEntry(metadata):
     imagePath = f'static/{metadata["id"]}.png'
@@ -54,6 +60,11 @@ def getCardList(page, search_query=None):
 @app.route('/static/<path:filename>', methods=['GET'])
 def image(filename):
     return send_from_directory('static', filename)
+
+@app.route('/get_png_info/<cardId>', methods=['GET'])
+def get_png_info(cardId):
+    png_info = getPngInfo(cardId)
+    return jsonify(png_info)
 
 @app.route('/', methods=['GET'])
 def index():
