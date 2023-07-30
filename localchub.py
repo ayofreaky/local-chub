@@ -25,7 +25,7 @@ def createCardEntry(metadata):
         'name': metadata['name'],
         'tagline': metadata['tagline'],
         'description': metadata['description'].replace("Creator's notes go here.", '\n'),
-        'topics': metadata['topics'],
+        'topics': [topic for topic in metadata['topics'] if topic != 'ROOT'],
         'imagePath': imagePath,
         'tokenCount': metadata['nTokens']
     }
