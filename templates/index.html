@@ -212,7 +212,26 @@
         /* Webkit-based browsers */
         .lightbox-description::-webkit-scrollbar-thumb {
             background-color: transparent; /* Make the scrollbar thumb invisible */
-        }        
+        }
+
+        .progress-container {
+            text-align: center;
+            margin: 10px;
+            display: inline-block;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            text-decoration: none;
+        }
+
+        #progress {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        #currentCardName {
+            font-size: 16px;
+        }
+
     </style>
 </head>
 <body class='light-mode'>
@@ -288,6 +307,12 @@
             <img src="" alt="Card Image" class="lightbox-image" id="lightboxImage">
             <div class="lightbox-description" id="lightboxDescription"></div>
         </div>
+    </div>
+
+    <div>
+        <button class="progress-container" onclick="syncCards()">Update cards</button>
+        <div id="progress"></div>
+        <div id="currentCardName"></div>
     </div>
 
     <script>
@@ -386,11 +411,9 @@
             fetch(`/get_png_info/${cardId}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Iterate through the data object and append non-empty values to lightboxDescription
                     for (const [key, value] of Object.entries(data.data)) {
                         if (isNonEmpty(value)) {
                             lightboxDescription.innerHTML += `<h2>${key.replace(/_/g, ' ').toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</h2> ${value}<br>`;
-
                         }
                     }
 
@@ -426,6 +449,43 @@
                 hideLightbox();
             }
         });
+
+        function updProgress(progress, currentCardName, newCardsCount) {
+            const progressElement = document.getElementById('progress');
+            const cardNameElement = document.getElementById('currentCardName');
+
+            progressElement.innerText = `Syncing progress: ${progress.toFixed(2)}%`;
+            cardNameElement.innerText = `Current Card: ${currentCardName}`;
+
+            if (progress >= 100) {
+                const alertMessage = newCardsCount > 0
+                    ? `Syncing completed! ${newCardsCount} new cards added.`
+                    : 'Syncing completed! No new cards added.';
+                alert(alertMessage);
+            }
+        }
+
+        function syncCards() {
+            updProgress(0, '', 0);
+
+            const eventSource = new EventSource('/sync');
+            eventSource.onmessage = function(event) {
+                const response = JSON.parse(event.data);
+                const progress = response.progress;
+                const currentCardName = response.currCard;
+                const newCardsCount = response.newCards;
+                updProgress(progress, currentCardName, newCardsCount);
+
+                if (progress >= 100) {
+                    eventSource.close();
+                }
+            };
+
+            eventSource.onerror = function() {
+                alert('Error syncing cards. Please try again later.');
+                eventSource.close();
+            };
+        }
     </script>
 </body>
 </html>

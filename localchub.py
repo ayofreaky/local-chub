@@ -1,6 +1,6 @@
-import os, json, base64
-from flask import Flask, render_template, request, send_from_directory, jsonify
-from PIL import Image
+import os, json, base64, requests
+from flask import Flask, render_template, request, send_from_directory, jsonify, Response
+from PIL import Image, UnidentifiedImageError
 
 app = Flask(__name__)
 
@@ -18,6 +18,13 @@ def getPngInfo(cardId):
         img = Image.open(f)
         return json.loads(base64.b64decode(img.png.im_info['chara']).decode('utf-8'))
 
+def pngCheck(cardId):
+    try:
+        Image.open(f'static/{cardId}.png').format == 'PNG'
+        return True
+    except UnidentifiedImageError:
+        return False
+
 def createCardEntry(metadata):
     imagePath = f'static/{metadata["id"]}.png'
     return {
@@ -32,28 +39,24 @@ def createCardEntry(metadata):
 
 def getCardList(page, search_query=None):
     cards = []
-    files = os.listdir('static')
+    cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
 
     if search_query:
-        for file in files:
-            if file.endswith('.json'):
-                cardId = file.split('.')[0]
-                metadata = getCardMetadata(cardId)
-                if 'author:' in search_query and search_query.split(':')[-1].lower() in metadata['fullPath'].split('/')[0].lower():
-                    cards.append(createCardEntry(metadata))
-                elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split(':')[-1].lower().split(',')):
-                    cards.append(createCardEntry(metadata))
-                elif metadata and all(query.strip().lower() in metadata['name'].lower() or query.strip().lower() in metadata['tagline'].lower() or query.strip().lower() in metadata['description'].lower() or query.strip().lower() in [tag.lower() for tag in metadata['topics']] for query in search_query.lower().split(',')):
-                    cards.append(createCardEntry(metadata))
+        for cardId in cardIds:
+            metadata = getCardMetadata(cardId)
+            if 'author:' in search_query and search_query.split(':')[-1].lower() in metadata['fullPath'].split('/')[0].lower():
+                cards.append(createCardEntry(metadata))
+            elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split(':')[-1].lower().split(',')):
+                cards.append(createCardEntry(metadata))
+            elif metadata and all(query.strip().lower() in metadata['name'].lower() or query.strip().lower() in metadata['tagline'].lower() or query.strip().lower() in metadata['description'].lower() or query.strip().lower() in [tag.lower() for tag in metadata['topics']] for query in search_query.lower().split(',')):
+                cards.append(createCardEntry(metadata))
     else:
         startIndex = (page - 1) * CARDS_PER_PAGE
         endIndex = startIndex + CARDS_PER_PAGE
-        for file in files[startIndex:endIndex]:
-            if file.endswith('.json'):
-                cardId = file.split('.')[0]
-                metadata = getCardMetadata(cardId)
-                if metadata:
-                    cards.append(createCardEntry(metadata))
+        for cardId in cardIds[startIndex:endIndex]:
+            metadata = getCardMetadata(cardId)
+            if metadata:
+                cards.append(createCardEntry(metadata))
 
     return cards
 
@@ -77,6 +80,47 @@ def index():
         search_results = [card for card in cards]
 
     return render_template('index.html', cards=cards, page=page, card_preview_size=CARD_PREVIEW_SIZE, search_results=search_results)
+
+@app.route('/sync', methods=['GET'])
+def syncCards():
+    cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
+    totalCards, currCard, newCards = 500, 0, 0
+    def dlCard(card):
+        nonlocal newCards, currCard
+        cardId = card['id']
+        if cardId not in cardIds:
+            with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
+                f.write(json.dumps(card, indent=4))
+            with open(f'static/{cardId}.png', 'wb') as f:
+                f.write(requests.get(f'https://avatars.charhub.io/avatars/{card["fullPath"]}/chara_card_v2.png').content)
+                print(f'Downloading {card["name"]} ({cardId})..')
+            if not pngCheck(cardId):
+                for ext in ['png', 'json']:
+                    os.remove(f'static/{cardId}.{ext}')
+                return False
+            newCards += 1
+        currCard += 1
+        return True
+
+    def genSyncData():
+        page = 1
+        while currCard < totalCards:
+            r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true'}).json()
+            cards = r['data']['nodes']
+            for card in cards:
+                result = dlCard(card)
+                if not result:
+                    continue
+                progress = (currCard / totalCards) * 100
+                card_name = card['name']
+                respData = {'progress': progress, 'currCard': card_name, 'newCards': newCards}
+                yield f"data: {json.dumps(respData)}\n\n"
+            page += 1
+
+        respData = {'progress': 100, 'currCard': 'Sync Completed', 'newCards': newCards}
+        yield f"data: {json.dumps(respData)}\n\n"
+
+    return Response(genSyncData(), content_type='text/event-stream')
 
 if __name__ == '__main__':
     app.run(debug=True, port=1488)
