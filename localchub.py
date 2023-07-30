@@ -26,14 +26,13 @@ def pngCheck(cardId):
         return False
 
 def createCardEntry(metadata):
-    imagePath = f'static/{metadata["id"]}.png'
     return {
         'author': metadata['fullPath'].split('/')[0],
         'name': metadata['name'],
         'tagline': metadata['tagline'],
         'description': metadata['description'].replace("Creator's notes go here.", '\n'),
         'topics': [topic for topic in metadata['topics'] if topic != 'ROOT'],
-        'imagePath': imagePath,
+        'imagePath': f'static/{metadata["id"]}.png',
         'tokenCount': metadata['nTokens']
     }
 
@@ -112,8 +111,8 @@ def syncCards():
                 if not result:
                     continue
                 progress = (currCard / totalCards) * 100
-                card_name = card['name']
-                respData = {'progress': progress, 'currCard': card_name, 'newCards': newCards}
+                cardName = card['name']
+                respData = {'progress': progress, 'currCard': cardName, 'newCards': newCards}
                 yield f"data: {json.dumps(respData)}\n\n"
             page += 1
 
