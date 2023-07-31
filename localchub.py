@@ -27,6 +27,7 @@ def pngCheck(cardId):
 
 def createCardEntry(metadata):
     return {
+        'id': metadata['id'],
         'author': metadata['fullPath'].split('/')[0],
         'name': metadata['name'],
         'tagline': metadata['tagline'],
@@ -58,6 +59,19 @@ def getCardList(page, search_query=None):
                 cards.append(createCardEntry(metadata))
 
     return cards
+
+def blacklistAdd(cardId):
+    if not os.path.exists('blacklist.txt'):
+        with open('blacklist.txt', 'w') as f:
+            f.write('')
+    with open('blacklist.txt', 'a') as f:
+        f.write(f'{cardId}\n')
+
+def blacklistCheck(cardId):
+    if os.path.exists('blacklist.txt'):
+        with open('blacklist.txt', 'r') as f:
+            return cardId in f.read().split('\n')
+    return False
 
 @app.route('/static/<path:filename>', methods=['GET'])
 def image(filename):
@@ -96,6 +110,7 @@ def syncCards():
             if not pngCheck(cardId):
                 for ext in ['png', 'json']:
                     os.remove(f'static/{cardId}.{ext}')
+                    blacklistAdd(cardId)
                 return False
             newCards += 1
         currCard += 1
@@ -107,19 +122,30 @@ def syncCards():
             r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true'}).json()
             cards = r['data']['nodes']
             for card in cards:
-                result = dlCard(card)
-                if not result:
-                    continue
-                progress = (currCard / totalCards) * 100
-                cardName = card['name']
-                respData = {'progress': progress, 'currCard': cardName, 'newCards': newCards}
-                yield f"data: {json.dumps(respData)}\n\n"
+                if not blacklistCheck(str(card['id'])):
+                    result = dlCard(card)
+                    if not result:
+                        continue
+                    progress = (currCard / totalCards) * 100
+                    cardName = card['name']
+                    respData = {'progress': progress, 'currCard': cardName, 'newCards': newCards}
+                    yield f"data: {json.dumps(respData)}\n\n"
             page += 1
 
         respData = {'progress': 100, 'currCard': 'Sync Completed', 'newCards': newCards}
         yield f"data: {json.dumps(respData)}\n\n"
 
     return Response(genSyncData(), content_type='text/event-stream')
+
+@app.route('/delete_card/<int:cardId>', methods=['POST', 'DELETE'])
+def delete_card(cardId):
+    try:
+        for ext in ['png', 'json']:
+            os.remove(f'static/{cardId}.{ext}')
+        blacklistAdd(cardId)
+        return jsonify({'message': 'Card deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=1488)
