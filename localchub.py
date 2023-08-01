@@ -48,6 +48,8 @@ def getCardList(page, search_query=None):
                 cards.append(createCardEntry(metadata))
             elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split(':')[-1].lower().split(',')):
                 cards.append(createCardEntry(metadata))
+            elif 'title:' in search_query and search_query.split(':')[-1].lower() in metadata['name'].split('/')[0].lower():
+                cards.append(createCardEntry(metadata))
             elif metadata and all(query.strip().lower() in metadata['name'].lower() or query.strip().lower() in metadata['tagline'].lower() or query.strip().lower() in metadata['description'].lower() or query.strip().lower() in [tag.lower() for tag in metadata['topics']] for query in search_query.lower().split(',')):
                 cards.append(createCardEntry(metadata))
     else:
