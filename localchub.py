@@ -110,7 +110,7 @@ def syncCards():
             if not pngCheck(cardId):
                 for ext in ['png', 'json']:
                     os.remove(f'static/{cardId}.{ext}')
-                    blacklistAdd(cardId)
+                blacklistAdd(cardId)
                 return False
             newCards += 1
         currCard += 1
