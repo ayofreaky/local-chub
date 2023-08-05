@@ -73,6 +73,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center; /* Center the cards on larger screens */
+            position: relative;
         }
 
         .pagination {
@@ -238,7 +239,51 @@
             visibility: hidden;
             z-index: 1;
         }
+        
+        .action-button {
+            position: absolute;
+            top: 5px;
+            font-size: 16px;
+            background-color: #a9a9a9a9;
+            color: #ffffff;
+            border: none;            
+            padding: 3px 6px;
+            cursor: pointer;
+            visibility: hidden;
+            z-index: 1;
+        }
 
+        .edit-tags-button {
+            left: 5px;
+            background-color: #a9a9a9a9;
+            color: #ffffff;
+        }
+
+        .delete-card-button {
+            right: 5px;
+            background-color: #a9a9a9a9;
+            color: #ffffff;
+        }
+
+        .edit-tags-container {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+
+        .edit-tags-input {
+            font-size: 16px;
+            padding: 3px;
+        }
+
+        .save-tags-button {
+            background-color: #a9a9a9a9;
+            color: #ffffff;
+            padding: 3px 8px;
+            cursor: pointer;
+        }        
 
     </style>
 </head>
@@ -261,8 +306,13 @@
     <div class='cards-container'>
         {% if search_results %}
             {% for card in search_results %}
-            <div class="card-container" id="card-{{ card.id }}" onmouseenter="showDeleteButton(this)" onmouseleave="hideDeleteButton(this)">
-                <button class="delete-card-button" onclick="deleteCard('{{ card.id }}')" style="visibility: hidden;">X</button>
+            <div class="card-container" id="card-{{ card.id }}" onmouseenter="showButtons(this)" onmouseleave="hideButtons(this)">
+                <button class="action-button delete-card-button" onclick="deleteCard('{{ card.id }}')">X</button>
+                <button class="action-button edit-tags-button" onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title="Edit tags">✎</button>
+                <div class="edit-tags-container" style="display: none;">
+                    <input type="text" class="edit-tags-input">
+                    <button class="save-tags-button" onclick="saveTags('{{ card.id }}')">Save</button>
+                </div>
                 <img src="{{ card.imagePath }}" alt='{{ card.name }}' class='card-image'>
                 <div class="card-content">
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
@@ -284,8 +334,13 @@
             {% endfor %}
         {% else %}
             {% for card in cards %}
-            <div class="card-container" id="card-{{ card.id }}" onmouseenter="showDeleteButton(this)" onmouseleave="hideDeleteButton(this)">
-                <button class="delete-card-button" onclick="deleteCard('{{ card.id }}')" style="visibility: hidden;">X</button>
+            <div class="card-container" id="card-{{ card.id }}" onmouseenter="showButtons(this)" onmouseleave="hideButtons(this)">
+                <button class="action-button delete-card-button" onclick="deleteCard('{{ card.id }}')">X</button>
+                <button class="action-button edit-tags-button" onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title="Edit tags">✎</button>
+                <div class="edit-tags-container" style="display: none;">
+                    <input type="text" class="edit-tags-input">
+                    <button class="save-tags-button" onclick="saveTags('{{ card.id }}')">Save</button>
+                </div>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
                 <div class="card-content">
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
@@ -502,14 +557,32 @@
             };
         }
 
-        function showDeleteButton(cardContainer) {
-            const deleteButton = cardContainer.querySelector('.delete-card-button');
-            deleteButton.style.visibility = 'visible';
+        function showButtons(cardContainer) {
+            const actionButtons = cardContainer.querySelectorAll('.action-button');
+            actionButtons.forEach(button => {
+                button.style.visibility = 'visible';
+            });
         }
 
-        function hideDeleteButton(cardContainer) {
-            const deleteButton = cardContainer.querySelector('.delete-card-button');
-            deleteButton.style.visibility = 'hidden';
+        function hideButtons(cardContainer) {
+            const actionButtons = cardContainer.querySelectorAll('.action-button');
+            actionButtons.forEach(button => {
+                button.style.visibility = 'hidden';
+            });
+            hideEditTags(cardContainer);
+        }
+
+        function showEditTags(editButton, existingTags) {
+            const cardContainer = editButton.closest('.card-container');
+            const editTagsContainer = cardContainer.querySelector('.edit-tags-container');
+            const editTagsInput = cardContainer.querySelector('.edit-tags-input');
+            editTagsInput.value = existingTags;
+            editTagsContainer.style.display = 'flex';
+        }
+
+        function hideEditTags(cardContainer) {
+            const editTagsContainer = cardContainer.querySelector('.edit-tags-container');
+            editTagsContainer.style.display = 'none';
         }
 
         function deleteCard(cardId) {
@@ -521,7 +594,7 @@
                             if (cardContainer) {
                                 cardContainer.remove();
                             }
-                            alert('Card deleted successfully'); // Display the success message
+                            alert('Card deleted successfully');
                         } else {
                             alert('Error deleting the card. Please try again later.');
                         }
@@ -532,6 +605,31 @@
                     });
             }
         }
+
+        function saveTags(cardId) {
+            const editTagsContainer = document.getElementById(`card-${cardId}`).querySelector('.edit-tags-container');
+            const tagsInput = editTagsContainer.querySelector('.edit-tags-input');
+            const tags = tagsInput.value.trim();
+            fetch(`/edit_tags/${cardId}`, {
+                method: 'POST',
+                body: new URLSearchParams({ tags }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            })
+                .then(response => {
+                    if (response.status === 200) {
+                        editTagsContainer.style.display = 'none';
+                        const tagsParagraph = editTagsContainer.previousElementSibling;
+                        tagsParagraph.innerHTML = `<i>Tags: ${tags.split(',').map(tag => `<a href='?search_query=tag:${tag.trim()}'>${tag.trim()}</a>`).join(', ')}</i>`;
+                        alert('Tags updated successfully');
+                    } else {
+                        alert('Error updating tags. Please try again later.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating tags:', error);
+                    alert('Error updating tags. Please try again later.');
+                });
+        }        
     </script>
 </body>
 </html>

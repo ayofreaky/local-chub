@@ -151,5 +151,17 @@ def delete_card(cardId):
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
+@app.route('/edit_tags/<int:cardId>', methods=['POST'])
+def edit_tags(cardId):
+    try:
+        newTags = request.form.get('tags')
+        metadata = getCardMetadata(cardId)
+        metadata['topics'] = [tag.strip() for tag in newTags.split(',') if tag != '']
+        with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, indent=4)
+        return jsonify({'message': 'Tags updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=1488)
