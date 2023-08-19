@@ -131,9 +131,7 @@ def syncCards():
                 if not blacklistCheck(str(card['id'])):
                     if not dlCard(card):
                         continue
-                    progress = round((currCard / totalCards) * 100, 2)
-                    cardName = card['name']
-                    respData = {'progress': progress, 'currCard': cardName, 'newCards': newCards}
+                    respData = {'progress': round((currCard / totalCards) * 100, 2), 'currCard': card['name'], 'newCards': newCards}
                     yield f'data: {json.dumps(respData)}\n\n'
             page += 1
 
