@@ -8,10 +8,9 @@ CARDS_PER_PAGE = 50
 CARD_PREVIEW_SIZE = (300, 300)
 
 def getCardMetadata(cardId):
-    metadataFile = os.path.join('static', f'{cardId}.json')
-    with open(metadataFile) as f:
+    with open(f'static/{cardId}.json', 'r', encoding='utf-8') as f:
         metadata = json.load(f)
-    return metadata
+        return metadata
 
 def getPngInfo(cardId):
     with open(f'static/{cardId}.png', 'rb') as f:
