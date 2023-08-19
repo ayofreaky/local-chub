@@ -31,7 +31,7 @@ def createCardEntry(metadata):
         'author': metadata['fullPath'].split('/')[0],
         'name': metadata['name'],
         'tagline': metadata['tagline'],
-        'description': metadata['description'].replace("Creator's notes go here.", '\n'),
+        'description': metadata['description'].replace('Creator\'s notes go here.', '\n'),
         'topics': [topic for topic in metadata['topics'] if topic != 'ROOT'],
         'imagePath': f'static/{metadata["id"]}.png',
         'tokenCount': metadata['nTokens']
@@ -100,10 +100,9 @@ def index():
 
 @app.route('/sync', methods=['GET'])
 def syncCards():
-    totalCards = int(request.args.get('c', 500))
+    totalCards, currCard, newCards = int(request.args.get('c', 500)), 0, 0
     cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
 
-    currCard, newCards = 0, 0
     def dlCard(card):
         nonlocal newCards, currCard
         cardId = card['id']
@@ -126,21 +125,20 @@ def syncCards():
         nonlocal totalCards
         page = 1
         while currCard < totalCards:
-            r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true'}).json()
+            r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true', 'min_tokens': '50'}).json()
             cards = r['data']['nodes']
             for card in cards:
                 if not blacklistCheck(str(card['id'])):
-                    result = dlCard(card)
-                    if not result:
+                    if not dlCard(card):
                         continue
-                    progress = (currCard / totalCards) * 100
+                    progress = round((currCard / totalCards) * 100, 2)
                     cardName = card['name']
                     respData = {'progress': progress, 'currCard': cardName, 'newCards': newCards}
-                    yield f"data: {json.dumps(respData)}\n\n"
+                    yield f'data: {json.dumps(respData)}\n\n'
             page += 1
 
         respData = {'progress': 100, 'currCard': 'Sync Completed', 'newCards': newCards}
-        yield f"data: {json.dumps(respData)}\n\n"
+        yield f'data: {json.dumps(respData)}\n\n'
 
     return Response(genSyncData(), content_type='text/event-stream')
 
