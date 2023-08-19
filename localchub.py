@@ -130,12 +130,10 @@ def syncCards():
                 if not blacklistCheck(str(card['id'])):
                     if not dlCard(card):
                         continue
-                    respData = {'progress': round((currCard / totalCards) * 100, 2), 'currCard': card['name'], 'newCards': newCards}
-                    yield f'data: {json.dumps(respData)}\n\n'
+                    yield f"data: {json.dumps({'progress': round((currCard / totalCards) * 100, 2), 'currCard': card['name'], 'newCards': newCards})}\n\n"
             page += 1
 
-        respData = {'progress': 100, 'currCard': 'Sync Completed', 'newCards': newCards}
-        yield f'data: {json.dumps(respData)}\n\n'
+        yield f"data: {json.dumps({'progress': 100, 'currCard': 'Sync Completed', 'newCards': newCards})}\n\n"
 
     return Response(genSyncData(), content_type='text/event-stream')
 
