@@ -100,8 +100,10 @@ def index():
 
 @app.route('/sync', methods=['GET'])
 def syncCards():
+    totalCards = int(request.args.get('c', 500))
     cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
-    totalCards, currCard, newCards = 500, 0, 0
+
+    currCard, newCards = 0, 0
     def dlCard(card):
         nonlocal newCards, currCard
         cardId = card['id']
@@ -121,6 +123,7 @@ def syncCards():
         return True
 
     def genSyncData():
+        nonlocal totalCards
         page = 1
         while currCard < totalCards:
             r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true'}).json()
