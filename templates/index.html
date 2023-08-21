@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Local Chub</title>
-    <link rel='icon' type="image/x-icon" href="/static/favicon.ico">
+    <link rel='icon' type='image/x-icon' href='/static/favicon.ico'>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -100,6 +100,10 @@
             border: none;
             cursor: pointer;
             font-size: 14px;
+        }
+
+        .download-btn:hover {
+            background-color: #999;
         }
 
         .search-container {
@@ -283,8 +287,32 @@
             color: #ffffff;
             padding: 3px 8px;
             cursor: pointer;
-        }        
+        }
 
+        #scrollButtonsContainer {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 99;
+        }
+
+        .scroll-button {
+            background-color: #a9a9a9a9;
+            color: white;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .scroll-button:hover {
+            background-color: #999;
+        }
     </style>
 </head>
 <body class='light-mode'>
@@ -306,15 +334,15 @@
     <div class='cards-container'>
         {% if search_results %}
             {% for card in search_results %}
-            <div class="card-container" id="card-{{ card.id }}" onmouseenter="showButtons(this)" onmouseleave="hideButtons(this)">
-                <button class="action-button delete-card-button" onclick="deleteCard('{{ card.id }}')">X</button>
-                <button class="action-button edit-tags-button" onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title="Edit tags">✎</button>
-                <div class="edit-tags-container" style="display: none;">
-                    <input type="text" class="edit-tags-input">
-                    <button class="save-tags-button" onclick="saveTags('{{ card.id }}')">Save</button>
+            <div class='card-container' id='card-{{ card.id }}' onmouseenter='showButtons(this)' onmouseleave='hideButtons(this)'>
+                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")'>X</button>
+                <button class='action-button edit-tags-button' onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title='Edit tags'>✎</button>
+                <div class='edit-tags-container' style='display: none;'>
+                    <input type='text' class='edit-tags-input'>
+                    <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
-                <img src="{{ card.imagePath }}" alt='{{ card.name }}' class='card-image'>
-                <div class="card-content">
+                <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
+                <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
                     <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
@@ -334,19 +362,19 @@
             {% endfor %}
         {% else %}
             {% for card in cards %}
-            <div class="card-container" id="card-{{ card.id }}" onmouseenter="showButtons(this)" onmouseleave="hideButtons(this)">
-                <button class="action-button delete-card-button" onclick="deleteCard('{{ card.id }}')">X</button>
-                <button class="action-button edit-tags-button" onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title="Edit tags">✎</button>
-                <div class="edit-tags-container" style="display: none;">
-                    <input type="text" class="edit-tags-input">
-                    <button class="save-tags-button" onclick="saveTags('{{ card.id }}')">Save</button>
+            <div class='card-container' id='card-{{ card.id }}' onmouseenter='showButtons(this)' onmouseleave='hideButtons(this)'>
+                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")'>X</button>
+                <button class='action-button edit-tags-button' onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title='Edit tags'>✎</button>
+                <div class='edit-tags-container' style='display: none;'>
+                    <input type='text' class='edit-tags-input'>
+                    <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
-                <div class="card-content">
+                <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
                     <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
-                    <p id="descr">{{ card.description }} <b> {{ card.tagline }}</b></p>
+                    <p id='descr'>{{ card.description }} <b> {{ card.tagline }}</b></p>
                     {% if card.topics %}
                         <br>
                         <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
@@ -371,17 +399,22 @@
         </div>
     {% endif %}
 
-    <div class="lightbox" id="lightbox">
-        <div class="lightbox-content">
-            <img src="" alt="Card Image" class="lightbox-image" id="lightboxImage">
-            <div class="lightbox-description" id="lightboxDescription"></div>
+    <div class='lightbox' id='lightbox'>
+        <div class='lightbox-content'>
+            <img src='' alt='Card Image' class='lightbox-image' id='lightboxImage'>
+            <div class='lightbox-description' id='lightboxDescription'></div>
         </div>
     </div>
 
     <div>
-        <button class="download-btn" onclick="syncCards()">Update cards</button>
-        <div id="progress"></div>
-        <div id="currentCardName"></div>
+        <button class='download-btn' onclick='syncCards()'>Update cards</button>
+        <div id='progress'></div>
+        <div id='currentCardName'></div>
+    </div>
+
+    <div id='scrollButtonsContainer'>
+        <button onclick='scrollToTop()' class='scroll-button' title='Scroll to top'>⬆</button>
+        <button onclick='scrollToBottom()' class='scroll-button' title='Scroll to bottom'>⬇</button>
     </div>
 
     <script>
@@ -629,7 +662,15 @@
                     console.error('Error updating tags:', error);
                     alert('Error updating tags. Please try again later.');
                 });
-        }        
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToBottom() {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
