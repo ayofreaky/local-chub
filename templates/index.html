@@ -447,7 +447,7 @@
 
         function downloadImage(imagePath, cardName) {
             let cardId = imagePath.split('/').pop().split('.').shift();
-            let filename = cardName + '_' + cardId + '.png';
+            let filename = cardName.replace(' ', '_') + '_' + cardId + '.png';
             fetch(imagePath)
                 .then(response => response.blob())
                 .then(blob => {
