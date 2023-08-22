@@ -409,6 +409,8 @@
             {% endif %}
             <a href='?page={{ next_page }}'>></a>
         </div>
+    {% else %}
+        <br>
     {% endif %}
 
     <div class='lightbox' id='lightbox'>
@@ -421,7 +423,7 @@
     <div>
         <button class='download-btn' onclick='syncCards();scrollToBottom()'>Update cards</button>
     </div>
-    <!-- <br> -->
+
     <div id='progress'></div>
     <div id='currentCardName'></div>
     <br>
