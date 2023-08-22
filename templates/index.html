@@ -108,7 +108,6 @@
         .search-container {
             display: flex;
             align-items: center;
-            margin-top: 20px;
             width: 100%;
             max-width: 500px;
             padding: 0 10px;
@@ -129,14 +128,13 @@
             min-width: 0;
         }
 
-        .search-option {
+        .search-type {
             display: flex;
             font-size:  18px;
             padding: 5px;
             align-items: center;
-            
         }
-
+        
         /* Media queries for responsiveness */
 
         /* For smaller screens like mobile phones */
@@ -296,7 +294,7 @@
             cursor: pointer;
         }
 
-        #scrollButtonsContainer {
+        #sideButtonsContainer {
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -324,17 +322,15 @@
 </head>
 <body class='light-mode'>
     <h1><a href='/?page=1'>Local Chub</a></h1>
-
-    <div class='dark-mode-toggle' onclick='toggleDarkMode()'></div>
-
+    <!-- <div class='dark-mode-toggle' onclick='toggleDarkMode()'></div> -->
     <form action='/' method='get' class='search-container'>
         <input type='text' name='query' placeholder='Search cards...' value="{{ request.args.get('query', '') }}", autocomplete='off'>
-        <select name='type' id='searchtype' class='search-option'>
+        <select name='type' id='searchtype' class='search-type'>
             <option value='basic'>Basic</option>
             <option value='tag'>Tag</option>
             <option value='title'>Title</option>
             <option value='author'>Author</option>
-            <option value='random'>Random</option>
+            <option value='random'>Random</option>            
         </select>
         <button type='submit'>Search</button>
     </form>
@@ -426,7 +422,8 @@
         <div id='currentCardName'></div>
     </div>
 
-    <div id='scrollButtonsContainer'>
+    <div id='sideButtonsContainer'>
+        <button onclick='toggleDarkMode()' class='scroll-button' title='Toggle dark mode'>🌓︎</button>
         <button onclick='scrollToTop()' class='scroll-button' title='Scroll to top'>⬆</button>
         <button onclick='scrollToBottom()' class='scroll-button' title='Scroll to bottom'>⬇</button>
     </div>
