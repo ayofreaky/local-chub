@@ -231,7 +231,7 @@
         }
 
         #progress {
-            font-size: 20px;
+            font-size: 18px;
             margin-bottom: 5px;
         }
 
@@ -276,7 +276,7 @@
 
         .edit-tags-container {
             position: absolute;
-            top: 5px;
+            top: 4px;
             left: 50%;
             transform: translateX(-50%);
             display: none;
@@ -285,6 +285,7 @@
         .edit-tags-input {
             font-size: 16px;
             padding: 3px;
+            border-radius: 5px;
         }
 
         .save-tags-button {
@@ -292,6 +293,7 @@
             color: #fff;
             padding: 3px 8px;
             cursor: pointer;
+            border-radius: 6px;
         }
 
         #sideButtonsContainer {
@@ -322,9 +324,8 @@
 </head>
 <body class='light-mode'>
     <h1><a href='/?page=1'>Local Chub</a></h1>
-    <!-- <div class='dark-mode-toggle' onclick='toggleDarkMode()'></div> -->
     <form action='/' method='get' class='search-container'>
-        <input type='text' name='query' placeholder='Search cards...' value="{{ request.args.get('query', '') }}", autocomplete='off'>
+        <input type='text' name='query' placeholder='Use commas to separate queries' value="{{ request.args.get('query', '') }}", autocomplete='off'>
         <select name='type' id='searchtype' class='search-type'>
             <option value='basic'>Basic</option>
             <option value='tag'>Tag</option>
@@ -345,16 +346,16 @@
         {% if search_results %}
             {% for card in search_results %}
             <div class='card-container' id='card-{{ card.id }}' onmouseenter='showButtons(this)' onmouseleave='hideButtons(this)'>
-                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")'>X</button>
+                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")' title='Delete card'>X</button>
                 <button class='action-button edit-tags-button' onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title='Edit tags'>✎</button>
                 <div class='edit-tags-container' style='display: none;'>
                     <input type='text' class='edit-tags-input'>
                     <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
-                <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
+                <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
-                    <p>by <a href='?query={{ card.author }}&type=author'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
+                    <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id='descr'>
                         {% set query = request.args.get('query') %}
@@ -363,7 +364,7 @@
                     </p>
                     {% if card.topics %}
                         <br>
-                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse other cards tagged with {{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
@@ -382,12 +383,12 @@
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
-                    <p>by <a href='?query={{ card.author }}&type=author'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
+                    <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id='descr'>{{ card.description }} <b> {{ card.tagline }}</b></p>
                     {% if card.topics %}
                         <br>
-                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse all cards by {{ card.author }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
@@ -417,10 +418,12 @@
     </div>
 
     <div>
-        <button class='download-btn' onclick='syncCards()'>Update cards</button>
-        <div id='progress'></div>
-        <div id='currentCardName'></div>
+        <button class='download-btn' onclick='syncCards();scrollToBottom()'>Update cards</button>
     </div>
+    <!-- <br> -->
+    <div id='progress'></div>
+    <div id='currentCardName'></div>
+    <br>
 
     <div id='sideButtonsContainer'>
         <button onclick='toggleDarkMode()' class='scroll-button' title='Toggle dark mode'>🌓︎</button>
@@ -567,7 +570,7 @@
             const progressElement = document.getElementById('progress');
             const cardNameElement = document.getElementById('currentCardName');
 
-            progressElement.innerText = `Syncing progress: ${progress.toFixed(2)}%`;
+            progressElement.innerText = `\nSyncing progress: ${progress.toFixed(2)}%`;
             cardNameElement.innerText = `Current Card: ${currentCardName}`;
 
             if (progress >= 100) {
