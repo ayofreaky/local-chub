@@ -46,7 +46,7 @@ def getCardList(page, search_query=None):
             metadata = getCardMetadata(cardId)
             if 'author:' in search_query and search_query.split(':')[-1].lower() in metadata['fullPath'].split('/')[0].lower():
                 cards.append(createCardEntry(metadata))
-            elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split(':')[-1].lower().split(',')):
+            elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split('tag:')[-1].lower().split(',')):
                 cards.append(createCardEntry(metadata))
             elif 'title:' in search_query and search_query.split(':')[-1].lower() in metadata['name'].split('/')[0].lower():
                 cards.append(createCardEntry(metadata))
