@@ -36,24 +36,29 @@ def createCardEntry(metadata):
         'tokenCount': metadata['nTokens']
     }
 
-def getCardList(page, search_query=None):
+def getCardList(page, query=None, searchType='basic'):
     cards = []
     cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
     count = len(cardIds)
 
-    if search_query:
+    if query:
         for cardId in cardIds:
             metadata = getCardMetadata(cardId)
-            if 'author:' in search_query and search_query.split(':')[-1].lower() in metadata['fullPath'].split('/')[0].lower():
+
+            if searchType == 'tag' and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in query.lower().split(',')):
                 cards.append(createCardEntry(metadata))
-            elif 'tag:' in search_query and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in search_query.split('tag:')[-1].lower().split(',')):
+            elif searchType == 'author' and query.strip().lower() == metadata['fullPath'].split('/')[0].lower():
                 cards.append(createCardEntry(metadata))
-            elif 'title:' in search_query and search_query.split(':')[-1].lower() in metadata['name'].split('/')[0].lower():
+            elif searchType == 'title' and query.strip().lower() in metadata['name'].lower():
                 cards.append(createCardEntry(metadata))
-            elif 'random:' in search_query and [cards.append(createCardEntry(getCardMetadata(random.choice(cardIds)))) for i in range(int(re.search(r'\d+', search_query.split(':')[-1].lower()).group())) if True]:
+            elif searchType == 'random':
+                cnt = int(re.search(r'\d+', query)[0]) if re.search(r'\d+', query) else 10
+                for i in range(cnt):
+                    [cards.append(createCardEntry(getCardMetadata(random.choice(cardIds))))]
                 break
-            elif metadata and all(query.strip().lower() in metadata['name'].lower() or query.strip().lower() in metadata['tagline'].lower() or query.strip().lower() in metadata['description'].lower() or query.strip().lower() in [tag.lower() for tag in metadata['topics']] for query in search_query.lower().split(',')):
+            elif searchType == 'basic' and all(query.strip().lower() in metadata['name'].lower() or query.strip().lower() in metadata['tagline'].lower() or query.strip().lower() in metadata['description'].lower() or query.strip().lower() in [tag.lower() for tag in metadata['topics']] for query in query.lower().split(',')):
                 cards.append(createCardEntry(metadata))
+
     else:
         startIndex = (page - 1) * CARDS_PER_PAGE
         endIndex = startIndex + CARDS_PER_PAGE
@@ -89,11 +94,12 @@ def get_png_info(cardId):
 @app.route('/', methods=['GET'])
 def index():
     page = int(request.args.get('page', 1))
-    search_query = request.args.get('search_query')
-    cards, count = getCardList(page, search_query)
+    query = request.args.get('query')
+    searchType = request.args.get('type')
+    cards, count = getCardList(page, query, searchType)
 
     search_results = None
-    if search_query:
+    if query:
         search_results = [card for card in cards]
 
     return render_template('index.html', cards=cards, page=page, card_preview_size=CARD_PREVIEW_SIZE, search_results=search_results, count=count)

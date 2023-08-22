@@ -15,13 +15,13 @@
         }
 
         body.light-mode {
-            background-color: #ffffff;
-            color: #000000;
+            background-color: #fff;
+            color: #000;
         }
 
         body.dark-mode {
-            background-color: #222222;
-            color: #ffffff;
+            background-color: #222;
+            color: #fff;
         }
 
         a {
@@ -44,7 +44,7 @@
             justify-content: space-between;
             align-items: center;
             overflow: hidden;
-            position: relative; /* Add relative positioning to the card container */
+            position: relative;
             overflow: hidden;            
         }
 
@@ -68,11 +68,10 @@
             margin: 8px 0;
         }
 
-        /* Container for all cards */
         .cards-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center; /* Center the cards on larger screens */
+            justify-content: center;
             position: relative;
         }
 
@@ -130,6 +129,14 @@
             min-width: 0;
         }
 
+        .search-option {
+            display: flex;
+            font-size:  18px;
+            padding: 5px;
+            align-items: center;
+            
+        }
+
         /* Media queries for responsiveness */
 
         /* For smaller screens like mobile phones */
@@ -176,9 +183,9 @@
         body.dark-mode .search-container input[type='text']::selection,
         body.dark-mode .search-container input[type='text']::-moz-selection {
             background-color: #a9a9a9a9;
-            color: #ffffff;
+            color: #fff;
         }
-        /* Lightbox styles */
+
         .lightbox {
             display: none;
             position: fixed;
@@ -235,7 +242,7 @@
             top: 5px;
             right: 5px;
             background-color: #a9a9a9a9;
-            color: #ffffff;
+            color: #fff;
             border: none;
             font-size: 16px;
             padding: 3px 6px;
@@ -249,7 +256,7 @@
             top: 5px;
             font-size: 16px;
             background-color: #a9a9a9a9;
-            color: #ffffff;
+            color: #fff;
             border: none;            
             padding: 3px 6px;
             cursor: pointer;
@@ -260,13 +267,13 @@
         .edit-tags-button {
             left: 5px;
             background-color: #a9a9a9a9;
-            color: #ffffff;
+            color: #fff;
         }
 
         .delete-card-button {
             right: 5px;
             background-color: #a9a9a9a9;
-            color: #ffffff;
+            color: #fff;
         }
 
         .edit-tags-container {
@@ -284,7 +291,7 @@
 
         .save-tags-button {
             background-color: #a9a9a9a9;
-            color: #ffffff;
+            color: #fff;
             padding: 3px 8px;
             cursor: pointer;
         }
@@ -300,7 +307,7 @@
 
         .scroll-button {
             background-color: #a9a9a9a9;
-            color: white;
+            color: #fff;
             border: none;
             outline: none;
             cursor: pointer;
@@ -321,7 +328,14 @@
     <div class='dark-mode-toggle' onclick='toggleDarkMode()'></div>
 
     <form action='/' method='get' class='search-container'>
-        <input type='text' name='search_query' placeholder='Search cards...' value="{{ request.args.get('search_query', '') }}", autocomplete='off'>
+        <input type='text' name='query' placeholder='Search cards...' value="{{ request.args.get('query', '') }}", autocomplete='off'>
+        <select name='type' id='searchtype' class='search-option'>
+            <option value='basic'>Basic</option>
+            <option value='tag'>Tag</option>
+            <option value='title'>Title</option>
+            <option value='author'>Author</option>
+            <option value='random'>Random</option>
+        </select>
         <button type='submit'>Search</button>
     </form>
 
@@ -344,16 +358,16 @@
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
-                    <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
+                    <p>by <a href='?query={{ card.author }}&type=author'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id='descr'>
-                        {% set search_query = request.args.get('search_query') %}
+                        {% set query = request.args.get('query') %}
                         {% set highlighted_description = card.description + '\n' + card.tagline %}
                         {{ highlighted_description|safe }}
                     </p>
                     {% if card.topics %}
                         <br>
-                        <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
@@ -372,12 +386,12 @@
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
-                    <p>by <a href='?search_query=author:{{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
+                    <p>by <a href='?query={{ card.author }}&type=author'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id='descr'>{{ card.description }} <b> {{ card.tagline }}</b></p>
                     {% if card.topics %}
                         <br>
-                        <p><i>Tags: {% for topic in card.topics %}<a href='?search_query=tag:{{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
@@ -458,7 +472,7 @@
     }
 
         function highlightSearchResults() {
-            const searchQuery = "{{ request.args.get('search_query') }}";
+            const searchQuery = "{{ request.args.get('query') }}";
             const highlightColor = '#a9a9a9a9';
             const cardTags = document.querySelectorAll('.card-content i a');
             const cardTitles = document.querySelectorAll('.card-content h3');
@@ -652,7 +666,7 @@
                     if (response.status === 200) {
                         editTagsContainer.style.display = 'none';
                         const tagsParagraph = editTagsContainer.previousElementSibling;
-                        tagsParagraph.innerHTML = `<i>Tags: ${tags.split(',').map(tag => `<a href='?search_query=tag:${tag.trim()}'>${tag.trim()}</a>`).join(', ')}</i>`;
+                        tagsParagraph.innerHTML = `<i>Tags: ${tags.split(',').map(tag => `<a href='?query=${tag.trim()}'>${tag.trim()}</a>`).join(', ')}</i>`;
                         alert('Tags updated successfully');
                     } else {
                         alert('Error updating tags. Please try again later.');
@@ -671,6 +685,13 @@
         function scrollToBottom() {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type');
+        if (typeParam) {
+            document.querySelector('#searchtype [value="' + typeParam + '"]').selected = true;
+        }
+
     </script>
 </body>
 </html>
