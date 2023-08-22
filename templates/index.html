@@ -203,9 +203,10 @@
         .lightbox-content {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
+            justify-content: center;
             max-width: 80%;
             max-height: 80%;
+
         }
 
         .lightbox-image {
@@ -380,12 +381,12 @@
                     <input type='text' class='edit-tags-input'>
                     <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
-                <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image'>
+                <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
                     <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
-                    <p id='descr'>{{ card.description }} <b> {{ card.tagline }}</b></p>
+                    <p id='descr'>{{ card.description }} <b>{{ card.tagline }}</b></p>
                     {% if card.topics %}
                         <br>
                         <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse all cards by {{ card.author }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
@@ -578,7 +579,7 @@
                     ? `Syncing completed! ${newCardsCount} new cards added.`
                     : 'Syncing completed! No new cards added.';
                 alert(alertMessage);
-                window.location.reload();
+                window.location.reload();window.scrollTo(0, 0);
             }
         }
 
