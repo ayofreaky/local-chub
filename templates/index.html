@@ -45,13 +45,15 @@
             align-items: center;
             overflow: hidden;
             position: relative;
-            overflow: hidden;            
+            overflow: hidden;
+            border-radius: 8px;
         }
 
         .card-image {
             max-width: 100%;
             max-height: 300px;
             object-fit: contain;
+            border-radius: 8px;
         }
 
         .card-content {
@@ -86,6 +88,7 @@
             margin: 5px;
             border: 1px solid #ccc;
             text-decoration: none;
+            border-radius: 5px;
         }
 
         .pagination .disabled {
@@ -99,6 +102,7 @@
             border: none;
             cursor: pointer;
             font-size: 14px;
+            border-radius: 6px;
         }
 
         .download-btn:hover {
@@ -130,7 +134,7 @@
 
         .search-type {
             display: flex;
-            font-size:  18px;
+            font-size: 18px;
             padding: 5px;
             align-items: center;
         }
@@ -247,8 +251,9 @@
             cursor: pointer;
             visibility: hidden;
             z-index: 1;
+            border-radius: 5px;
         }
-        
+
         .action-button {
             position: absolute;
             top: 5px;
@@ -266,12 +271,7 @@
             left: 5px;
             background-color: #a9a9a9a9;
             color: #fff;
-        }
-
-        .delete-card-button {
-            right: 5px;
-            background-color: #a9a9a9a9;
-            color: #fff;
+            border-radius: 5px;
         }
 
         .edit-tags-container {
