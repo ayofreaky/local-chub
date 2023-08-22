@@ -39,6 +39,7 @@ def createCardEntry(metadata):
 def getCardList(page, search_query=None):
     cards = []
     cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
+    count = len(cardIds)
 
     if search_query:
         for cardId in cardIds:
@@ -61,7 +62,7 @@ def getCardList(page, search_query=None):
             if metadata:
                 cards.append(createCardEntry(metadata))
 
-    return cards
+    return cards, count
 
 def blacklistAdd(cardId):
     if not os.path.exists('blacklist.txt'):
@@ -89,13 +90,13 @@ def get_png_info(cardId):
 def index():
     page = int(request.args.get('page', 1))
     search_query = request.args.get('search_query')
-    cards = getCardList(page, search_query)
+    cards, count = getCardList(page, search_query)
 
     search_results = None
     if search_query:
         search_results = [card for card in cards]
 
-    return render_template('index.html', cards=cards, page=page, card_preview_size=CARD_PREVIEW_SIZE, search_results=search_results)
+    return render_template('index.html', cards=cards, page=page, card_preview_size=CARD_PREVIEW_SIZE, search_results=search_results, count=count)
 
 @app.route('/sync', methods=['GET'])
 def syncCards():
