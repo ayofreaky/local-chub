@@ -405,7 +405,7 @@
                     
                     {% if card.topics %}
                         <br>
-                        <p id='tags'><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse all cards by {{ card.author }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p id='tags'><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse other cards tagged with {{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
