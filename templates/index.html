@@ -359,13 +359,19 @@
                     <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
                     <p id='descr'>
-                        {% set query = request.args.get('query') %}
-                        {% set highlighted_description = card.description + '\n' + card.tagline %}
-                        {{ highlighted_description|safe }}
+                        {% if card.tagline|length > 1 %}
+                            <br>
+                            <p id='tagline'>{{ card.tagline }}</p>
+                        {% endif %}
+                        {% if card.description|length > 1 %}
+                            <br>
+                            <p id='description'>{{ card.description }}</p>
+                        {% endif %}
                     </p>
+
                     {% if card.topics %}
                         <br>
-                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse other cards tagged with {{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p id='tags'><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse other cards tagged with {{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
@@ -386,10 +392,20 @@
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
                     <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
                     <br>
-                    <p id='descr'>{{ card.description }} <b>{{ card.tagline }}</b></p>
+                    <p id='descr'>
+                        {% if card.tagline|length > 1 %}
+                            <br>
+                            <p id='tagline'>{{ card.tagline }}</p>
+                        {% endif %}
+                        {% if card.description|length > 1 %}
+                            <br>
+                            <p id='description'>{{ card.description }}</p>
+                        {% endif %}
+                    </p>
+                    
                     {% if card.topics %}
                         <br>
-                        <p><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse all cards by {{ card.author }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
+                        <p id='tags'><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse all cards by {{ card.author }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
@@ -477,42 +493,25 @@
         function highlightSearchResults() {
             const searchQuery = "{{ request.args.get('query') }}";
             const highlightColor = '#a9a9a9a9';
-            const cardTags = document.querySelectorAll('.card-content i a');
-            const cardTitles = document.querySelectorAll('.card-content h3');
-            const cardDescriptions = document.querySelectorAll('.card-content #descr');
-
-            const cleanedQuery = searchQuery.toLowerCase().startsWith('tag:')
-            ? searchQuery.slice(4).trim()
-            : searchQuery.toLowerCase().startsWith('author:')
-            ? searchQuery.slice(7).trim()
-            : searchQuery;
-
-            const tagQueries = cleanedQuery.split(',').map(query => query.trim());
+            const tagQueries = searchQuery.trim().split(',').map(query => query.trim());
             const tagRegex = new RegExp(tagQueries.map(escapeRegExp).join('|'), 'gi');
+            const cardContainers = document.querySelectorAll('.card-container');
 
-            for (const tag of cardTags) {
-                tag.innerHTML = tag.textContent.replace(
-                    tagRegex,
-                    match => `<span style="background-color: ${highlightColor};">${match}</span>`
+            cardContainers.forEach(cardContainer => {
+                const elementsToHighlight = cardContainer.querySelectorAll(
+                    '.card-content i a, .card-content h3, .card-content #descr'
                 );
-            }
 
-            for (const title of cardTitles) {
-                title.innerHTML = title.textContent.replace(
-                    tagRegex,
-                    match => `<span style="background-color: ${highlightColor};">${match}</span>`
-                );
-            }
-
-            for (const description of cardDescriptions) {
-                description.innerHTML = description.textContent.replace(
-                    tagRegex,
-                    match => `<span style="background-color: ${highlightColor};">${match}</span>`
-                );
-            }
+                elementsToHighlight.forEach(element => {
+                    element.innerHTML = element.textContent.replace(
+                        tagRegex,
+                        match => `<span style="background-color: ${highlightColor};">${match}</span>`
+                    );
+                });
+            });
         }
-        highlightSearchResults();
 
+        highlightSearchResults();
         // Lightbox
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightboxImage');
