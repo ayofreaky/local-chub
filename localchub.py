@@ -130,15 +130,15 @@ def syncCards():
     def genSyncData():
         nonlocal totalCards
         page = 1
-        while currCard < totalCards:
-            r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true', 'min_tokens': '50'}).json()
-            cards = r['data']['nodes']
-            for card in cards:
-                if not blacklistCheck(str(card['id'])):
-                    if not dlCard(card):
-                        continue
-                    yield f"data: {json.dumps({'progress': round((currCard / totalCards) * 100, 2), 'currCard': card['name'], 'newCards': newCards})}\n\n"
-            page += 1
+        r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true', 'min_tokens': '50'}).json()
+        cards = r['data']['nodes']
+        for card in cards:
+            yield f"data: {json.dumps({'progress': round((currCard / len(cards)) * 100, 2), 'currCard': card['name'], 'newCards': newCards})}\n\n"
+            if not blacklistCheck(str(card['id'])):
+                if card['id'] == 88:
+                    continue
+                if not dlCard(card):
+                    continue
 
         yield f"data: {json.dumps({'progress': 100, 'currCard': 'Sync Completed', 'newCards': newCards})}\n\n"
 
