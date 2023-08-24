@@ -692,9 +692,10 @@
             document.querySelector('#searchtype [value="' + typeParam + '"]').selected = true;
         }
 
-        const compactModePref = localStorage.getItem('compactMode') === 'true';
         function applyCompactModePreference() {
+            const compactModePref = localStorage.getItem('compactMode') === 'true';
             const cardContainers = document.querySelectorAll('.card-container');
+            
             cardContainers.forEach(cardContainer => {
                 const description = cardContainer.querySelector('.card-content #description');
                 if (description) {
@@ -704,17 +705,20 @@
         }
 
         function toggleCompactMode() {
+            const compactModePref = localStorage.getItem('compactMode') === 'true';
             const cardContainers = document.querySelectorAll('.card-container');
+            
             cardContainers.forEach(cardContainer => {
                 const description = cardContainer.querySelector('.card-content #description');
                 if (description) {
-                    description.style.display = description.style.display === 'none' ? 'block' : 'none';
+                    description.style.display = compactModePref ? 'block' : 'none';
                 }
             });
 
             localStorage.setItem('compactMode', compactModePref ? 'false' : 'true');
         }
 
+        // Apply compact mode preference on page load
         applyCompactModePreference();
 
     </script>
