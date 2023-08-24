@@ -30,7 +30,7 @@ def createCardEntry(metadata):
         'author': metadata['fullPath'].split('/')[0],
         'name': metadata['name'],
         'tagline': metadata['tagline'],
-        'description': metadata['description'].replace('Creator\'s notes go here.', '\n'),
+        'description': re.sub(r'\[([^\]]+)\]\((https?://[^\)]+)\)|(?<!\()\b(https?://[^\s]+)\b', r'<a href="\2\3">\1\3</a>', metadata['description'].replace('Creator\'s notes go here.', '\n')),
         'topics': [topic for topic in metadata['topics'] if topic != 'ROOT'],
         'imagePath': f'static/{metadata["id"]}.png',
         'tokenCount': metadata['nTokens']
