@@ -305,7 +305,7 @@
             z-index: 99;
         }
 
-        .scroll-button {
+        .side-buttons-container {
             background-color: #a9a9a9a9;
             color: #fff;
             border: none;
@@ -317,7 +317,7 @@
             margin-bottom: 5px;
         }
 
-        .scroll-button:hover {
+        .side-buttons-container:hover {
             background-color: #999;
         }
     </style>
@@ -355,16 +355,14 @@
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
-                    <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
+                    <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens</p>
                     <br>
                     <p id='descr'>
                         {% if card.tagline|length > 1 %}
-                            <br>
                             <p id='tagline'>{{ card.tagline }}</p>
                         {% endif %}
                         {% if card.description|length > 1 %}
-                            <br>
-                            <p id='description'>{{ card.description }}</p>
+                            <p id='description' style="display: none;">{{ card.description }}</p>
                         {% endif %}
                     </p>
 
@@ -372,6 +370,7 @@
                         <br>
                         <p id='tags'><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse other cards tagged with {{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
                     {% endif %}
+
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
                 </div>
@@ -393,15 +392,13 @@
                     <br>
                     <p id='descr'>
                         {% if card.tagline|length > 1 %}
-                            <br>
                             <p id='tagline'>{{ card.tagline }}</p>
                         {% endif %}
                         {% if card.description|length > 1 %}
-                            <br>
-                            <p id='description'>{{ card.description }}</p>
+                            <p id='description' style="display: none;">{{ card.description }}</p>
                         {% endif %}
                     </p>
-                    
+
                     {% if card.topics %}
                         <br>
                         <p id='tags'><i>Tags: {% for topic in card.topics %}<a href='?query={{ topic }}&type=tag' title='Browse other cards tagged with {{ topic }}'>{{ topic }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i></p>
@@ -444,9 +441,10 @@
     <br>
 
     <div id='sideButtonsContainer'>
-        <button onclick='toggleDarkMode()' class='scroll-button' title='Toggle dark mode'>🌓︎</button>
-        <button onclick='scrollToTop()' class='scroll-button' title='Scroll to top'>⬆</button>
-        <button onclick='scrollToBottom()' class='scroll-button' title='Scroll to bottom'>⬇</button>
+        <button onclick='toggleCompactMode()' class='side-buttons-container' title='Toggle compact mode'>⇳</button>
+        <button onclick='toggleDarkMode()' class='side-buttons-container' title='Toggle dark mode'>🌓︎</button>
+        <button onclick='scrollToTop()' class='side-buttons-container' title='Scroll to top'>⬆</button>
+        <button onclick='scrollToBottom()' class='side-buttons-container' title='Scroll to bottom'>⬇</button>
     </div>
 
     <script>
@@ -692,6 +690,31 @@
         if (typeParam) {
             document.querySelector('#searchtype [value="' + typeParam + '"]').selected = true;
         }
+
+        const compactModePref = localStorage.getItem('compactMode') === 'true';
+        function applyCompactModePreference() {
+            const cardContainers = document.querySelectorAll('.card-container');
+            cardContainers.forEach(cardContainer => {
+                const description = cardContainer.querySelector('.card-content #description');
+                if (description) {
+                    description.style.display = compactModePref ? 'none' : 'block';
+                }
+            });
+        }
+
+        function toggleCompactMode() {
+            const cardContainers = document.querySelectorAll('.card-container');
+            cardContainers.forEach(cardContainer => {
+                const description = cardContainer.querySelector('.card-content #description');
+                if (description) {
+                    description.style.display = description.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+
+            localStorage.setItem('compactMode', compactModePref ? 'false' : 'true');
+        }
+
+        applyCompactModePreference();
 
     </script>
 </body>
