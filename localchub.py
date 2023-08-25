@@ -117,11 +117,9 @@ def syncCards():
             if card['lastActivityAt'] != getCardMetadata(card['id'])['lastActivityAt']:
                 cardIds.remove(cardId)
                 pTask = 'Updating'
-
-                if not os.path.exists('outdated cards'):
-                    os.mkdir('outdated cards')
+                if not os.path.exists('backup'): os.mkdir('backup')
                 for ext in ['png', 'json']: # make a backup jic
-                    os.rename(f'static/{cardId}.{ext}', f'outdated cards/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
+                    os.rename(f'static/{cardId}.{ext}', f'backup/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
 
         if cardId not in cardIds:
             with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
