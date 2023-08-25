@@ -112,12 +112,23 @@ def syncCards():
     def dlCard(card):
         nonlocal newCards, currCard
         cardId = card['id']
+        pTask = 'Downloading'
+        if card['createdAt'] != card['lastActivityAt'] and os.path.exists(f'static/{cardId}.json'):
+            if card['lastActivityAt'] != getCardMetadata(card['id'])['lastActivityAt']:
+                cardIds.remove(cardId)
+                pTask = 'Updating'
+
+                if not os.path.exists('outdated cards'):
+                    os.mkdir('outdated cards')
+                for ext in ['png', 'json']: # make a backup jic
+                    os.rename(f'static/{cardId}.{ext}', f'outdated cards/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
+
         if cardId not in cardIds:
             with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
                 f.write(json.dumps(card, indent=4))
             with open(f'static/{cardId}.png', 'wb') as f:
                 f.write(requests.get(f'https://avatars.charhub.io/avatars/{card["fullPath"]}/chara_card_v2.png').content)
-                print(f'Downloading {card["name"]} ({cardId})..')
+                print(f'{pTask} {card["name"]} ({cardId})..')
             if not pngCheck(cardId):
                 for ext in ['png', 'json']:
                     os.remove(f'static/{cardId}.{ext}')
@@ -130,7 +141,7 @@ def syncCards():
     def genSyncData():
         nonlocal totalCards
         page = 1
-        r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'created_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true', 'min_tokens': '50'}).json()
+        r = requests.get('https://v2.chub.ai/search', params={'first': totalCards, 'page': f'{page}', 'sort': 'last_activity_at', 'venus': 'false', 'asc': 'false', 'nsfw': 'true', 'min_tokens': '50'}).json()
         cards = r['data']['nodes']
         for card in cards:
             yield f"data: {json.dumps({'progress': round((currCard / len(cards)) * 100, 2), 'currCard': card['name'], 'newCards': newCards})}\n\n"

@@ -532,7 +532,6 @@
                             lightboxDescription.innerHTML += `<h2>${key.replace(/_/g, ' ').toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</h2> ${value}<br>`;
                         }
                     }
-
                     lightbox.style.display = 'flex';
                 })
                 .catch(error => {
@@ -575,8 +574,8 @@
 
             if (progress >= 100) {
                 const alertMessage = newCardsCount > 0
-                    ? `Syncing completed! ${newCardsCount} new cards added.`
-                    : 'Syncing completed! No new cards added.';
+                    ? `Syncing completed! ${newCardsCount} new cards have been added/updated.`
+                    : 'Syncing completed! No new cards have been added/updated.';
                 alert(alertMessage);
                 window.location.reload();window.scrollTo(0, 0);
             }
@@ -718,7 +717,6 @@
             localStorage.setItem('compactMode', compactModePref ? 'false' : 'true');
         }
 
-        // Apply compact mode preference on page load
         applyCompactModePreference();
 
     </script>
