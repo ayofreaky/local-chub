@@ -7,6 +7,10 @@ app = Flask(__name__)
 CARDS_PER_PAGE = 50
 CARD_PREVIEW_SIZE = (300, 300)
 
+def deleteCard(cardId):
+    for ext in ['png', 'json']:
+        os.remove(f'static/{cardId}.{ext}')
+
 def getCardMetadata(cardId):
     with open(f'static/{cardId}.json', 'r', encoding='utf-8') as f:
         metadata = json.load(f)
@@ -40,10 +44,12 @@ def getCardList(page, query=None, searchType='basic'):
     cards = []
     cardIds = sorted([int(file.split('.')[0]) for file in os.listdir('static') if file.lower().endswith('.png')], reverse=True)
     count = len(cardIds)
+    randomTags = set()
 
     if query:
         for cardId in cardIds:
             metadata = getCardMetadata(cardId)
+            randomTags.update(metadata['topics'])
 
             if searchType == 'tag' and all(tag.strip() in [tag.lower() for tag in metadata['topics']] for tag in query.lower().split(',')):
                 cards.append(createCardEntry(metadata))
@@ -65,9 +71,12 @@ def getCardList(page, query=None, searchType='basic'):
         for cardId in cardIds[startIndex:endIndex]:
             metadata = getCardMetadata(cardId)
             if metadata:
+                randomTags.update(metadata['topics'])
                 cards.append(createCardEntry(metadata))
 
-    return cards, count
+    randomTags = random.choices(list(randomTags), k=10)
+
+    return cards, count, randomTags
 
 def blacklistAdd(cardId):
     if not os.path.exists('blacklist.txt'):
@@ -96,13 +105,13 @@ def index():
     page = int(request.args.get('page', 1))
     query = request.args.get('query')
     searchType = request.args.get('type')
-    cards, count = getCardList(page, query, searchType)
+    cards, count, randomTags = getCardList(page, query, searchType)
 
     search_results = None
     if query:
         search_results = [card for card in cards]
 
-    return render_template('index.html', cards=cards, page=page, card_preview_size=CARD_PREVIEW_SIZE, search_results=search_results, count=count)
+    return render_template('index.html', cards=cards, page=page, card_preview_size=CARD_PREVIEW_SIZE, search_results=search_results, count=count, random_tags=randomTags)
 
 @app.route('/sync', methods=['GET'])
 def syncCards():
@@ -128,8 +137,7 @@ def syncCards():
                 f.write(requests.get(f'https://avatars.charhub.io/avatars/{card["fullPath"]}/chara_card_v2.png').content)
                 print(f'{pTask} {card["name"]} ({cardId})..')
             if not pngCheck(cardId):
-                for ext in ['png', 'json']:
-                    os.remove(f'static/{cardId}.{ext}')
+                deleteCard(cardId)
                 blacklistAdd(cardId)
                 return False
             newCards += 1
@@ -156,8 +164,7 @@ def syncCards():
 @app.route('/delete_card/<int:cardId>', methods=['POST', 'DELETE'])
 def delete_card(cardId):
     try:
-        for ext in ['png', 'json']:
-            os.remove(f'static/{cardId}.{ext}')
+        deleteCard(cardId)
         blacklistAdd(cardId)
         return jsonify({'message': 'Card deleted successfully'}), 200
     except Exception as e:

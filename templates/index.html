@@ -297,7 +297,7 @@
             border-color: #222;
         }
 
-        #sideButtonsContainer {
+        #sidebar {
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -306,7 +306,7 @@
             z-index: 99;
         }
 
-        .side-buttons-container {
+        .sidebar-container {
             background-color: #a9a9a9a9;
             color: #fff;
             border: none;
@@ -318,9 +318,27 @@
             margin-bottom: 5px;
         }
 
-        .side-buttons-container:hover {
+        .sidebar-container:hover {
             background-color: #999;
         }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tag-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+        }
+
+        .tag-container p {
+            margin: 0;
+        }
+
     </style>
 </head>
 <body class='light-mode'>
@@ -341,6 +359,14 @@
         <h2>Search Results ({{ search_results|length }} results)</h2>
     {% else %}
         <h2>All Cards ({{ count }}) </h2>
+    {% endif %}
+
+    {% if random_tags %}
+        <div class='tags-container'>
+            {% for tag in random_tags %}
+                <div class='tag-container'><p><a href='?query={{ tag }}&type=tag' title='Browse other cards tagged with {{ tag }}'>{{ tag }}</a></p></div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     <div class='cards-container'>
@@ -441,11 +467,12 @@
     <div id='currentCardName'></div>
     <br>
 
-    <div id='sideButtonsContainer'>
-        <button onclick='toggleCompactMode()' class='side-buttons-container' title='Toggle compact mode'>⇳</button>
-        <button onclick='toggleDarkMode()' class='side-buttons-container' title='Toggle dark mode'>🌓︎</button>
-        <button onclick='scrollToTop()' class='side-buttons-container' title='Scroll to top'>⬆</button>
-        <button onclick='scrollToBottom()' class='side-buttons-container' title='Scroll to bottom'>⬇</button>
+    <div id='sidebar'>
+        <!-- <button class='sidebar-container' title='Open settings'>≡</button> -->
+        <button onclick='toggleCompactMode()' class='sidebar-container' title='Toggle compact mode'>⇳</button>
+        <button onclick='toggleDarkMode()' class='sidebar-container' title='Toggle dark mode'>🌓︎</button>
+        <button onclick='scrollToTop()' class='sidebar-container' title='Scroll to top'>⬆</button>
+        <button onclick='scrollToBottom()' class='sidebar-container' title='Scroll to bottom'>⬇</button>
     </div>
 
     <script>
@@ -574,8 +601,8 @@
 
             if (progress >= 100) {
                 const alertMessage = newCardsCount > 0
-                    ? `Syncing completed! ${newCardsCount} new cards have been added/updated.`
-                    : 'Syncing completed! No new cards have been added/updated.';
+                    ? `Syncing completed! ${newCardsCount} cards have been added/updated.`
+                    : 'Syncing completed! No cards have been added/updated.';
                 alert(alertMessage);
                 window.location.reload();window.scrollTo(0, 0);
             }
