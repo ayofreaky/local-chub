@@ -400,6 +400,7 @@
 
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
+                    <button class='download-btn' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}">Copy JSON</button>
                 </div>
             </div>
             {% endfor %}
@@ -432,6 +433,7 @@
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
+                    <button class='download-btn' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}">Copy JSON</button>                    
                 </div>
             </div>
             {% endfor %}
@@ -541,6 +543,7 @@
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightboxImage');
         const lightboxDescription = document.getElementById('lightboxDescription');
+        let cardInfoData = '';
 
         function showLightbox(imagePath, description) {
             lightboxImage.src = imagePath;
@@ -554,6 +557,7 @@
             fetch(`/get_png_info/${cardId}`)
                 .then(response => response.json())
                 .then(data => {
+                    cardInfoData = data;
                     for (const [key, value] of Object.entries(data.data)) {
                         if (isNonEmpty(value)) {
                             lightboxDescription.innerHTML += `<h2>${key.replace(/_/g, ' ').toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</h2> ${value}<br>`;
