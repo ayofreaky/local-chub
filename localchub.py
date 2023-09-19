@@ -124,11 +124,14 @@ def syncCards():
         pTask = 'Downloading'
         if card['createdAt'] != card['lastActivityAt'] and os.path.exists(f'static/{cardId}.json'):
             if card['lastActivityAt'] != getCardMetadata(card['id'])['lastActivityAt']:
-                cardIds.remove(cardId)
-                pTask = 'Updating'
-                if not os.path.exists('backup'): os.mkdir('backup')
-                for ext in ['png', 'json']: # make a backup jic
-                    os.rename(f'static/{cardId}.{ext}', f'backup/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
+                try:
+                    cardIds.remove(cardId)
+                    pTask = 'Updating'
+                    if not os.path.exists('backup'): os.mkdir('backup')
+                    for ext in ['png', 'json']: # make a backup jic
+                        os.rename(f'static/{cardId}.{ext}', f'backup/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
+                except Exception as e:
+                    print(e, cardId)
 
         if cardId not in cardIds:
             with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
