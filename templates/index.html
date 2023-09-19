@@ -282,7 +282,7 @@
             background-color: #a9a9a9a9;
             color: #fff;
             border-radius: 5px;
-        }        
+        }
 
         .edit-tags-container {
             position: absolute;
@@ -389,7 +389,7 @@
                     <input type='text' class='edit-tags-input'>
                     <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
-                <button class='action-button copy-json-button' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}" title="Copy JSON">📋</button>
+                <button class='action-button copy-json-button' onclick="copyJSON('{{ card.id }}', this)" title="Copy JSON">📋</button>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
@@ -424,7 +424,7 @@
                     <input type='text' class='edit-tags-input'>
                     <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
-                <button class='action-button copy-json-button' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}" title="Copy JSON">📋</button>
+                <button class='action-button copy-json-button' onclick="copyJSON('{{ card.id }}', this)" title="Copy JSON">📋</button>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
@@ -715,6 +715,24 @@
                 .catch(error => {
                     console.error('Error updating tags:', error);
                     alert('Error updating tags. Please try again later.');
+                });
+        }
+
+        function copyJSON(cardId, button) {
+            fetch('/get_png_info/' + cardId)
+                .then(response => response.json())
+                .then(data => {
+                    const cardInfoDataString = JSON.stringify(data, null, 4);
+                    navigator.clipboard.writeText(cardInfoDataString)
+                        .then(() => {
+                            button.innerHTML = '✓';
+                            setTimeout(function () {
+                                button.innerHTML = '📋';
+                            }, 2000);
+                        })
+                        .catch(error => {
+                            console.error('Failed to copy JSON: ', error);
+                        });
                 });
         }
 
