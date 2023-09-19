@@ -266,6 +266,7 @@
             cursor: pointer;
             visibility: hidden;
             z-index: 1;
+            width: 10%;
         }
 
         .edit-tags-button {
@@ -274,6 +275,14 @@
             color: #fff;
             border-radius: 5px;
         }
+
+        .copy-json-button {
+            left: 5px;
+            top: 35px;
+            background-color: #a9a9a9a9;
+            color: #fff;
+            border-radius: 5px;
+        }        
 
         .edit-tags-container {
             position: absolute;
@@ -285,6 +294,7 @@
             font-size: 16px;
             padding: 3px;
             border-radius: 5px;
+            width: 180px;
         }
 
         .save-tags-button {
@@ -373,12 +383,13 @@
         {% if search_results %}
             {% for card in search_results %}
             <div class='card-container' id='card-{{ card.id }}' onmouseenter='showButtons(this)' onmouseleave='hideButtons(this)'>
-                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")' title='Delete card'>X</button>
+                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")' title='Delete card'>🗙</button>
                 <button class='action-button edit-tags-button' onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title='Edit tags'>✎</button>
                 <div class='edit-tags-container' style='display: none;'>
                     <input type='text' class='edit-tags-input'>
                     <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
+                <button class='action-button copy-json-button' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}" title="Copy JSON">📋</button>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
@@ -407,12 +418,13 @@
         {% else %}
             {% for card in cards %}
             <div class='card-container' id='card-{{ card.id }}' onmouseenter='showButtons(this)' onmouseleave='hideButtons(this)'>
-                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")'>X</button>
+                <button class='action-button delete-card-button' onclick='deleteCard("{{ card.id }}")'>🗙</button>
                 <button class='action-button edit-tags-button' onclick="showEditTags(this, '{{ ','.join(card.topics) }}')" title='Edit tags'>✎</button>
                 <div class='edit-tags-container' style='display: none;'>
                     <input type='text' class='edit-tags-input'>
                     <button class='save-tags-button' onclick='saveTags("{{ card.id }}")'>Save</button>
                 </div>
+                <button class='action-button copy-json-button' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}" title="Copy JSON">📋</button>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
                     <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
@@ -433,7 +445,7 @@
                     {% endif %}
                     <br>
                     <button class='download-btn' onclick="downloadImage('{{ card.imagePath }}', '{{ card.name }}')">Download</button>
-                    <button class='download-btn' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}">Copy JSON</button>                    
+                    <!-- <button class='download-btn' onclick="{fetch('/get_png_info/' + '{{ card.id }}').then(response => response.json()).then(data => {const cardInfoDataString = JSON.stringify(data, null, 4);navigator.clipboard.writeText(cardInfoDataString);});}">Copy JSON</button>                     -->
                 </div>
             </div>
             {% endfor %}
@@ -543,7 +555,6 @@
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightboxImage');
         const lightboxDescription = document.getElementById('lightboxDescription');
-        let cardInfoData = '';
 
         function showLightbox(imagePath, description) {
             lightboxImage.src = imagePath;
@@ -557,7 +568,6 @@
             fetch(`/get_png_info/${cardId}`)
                 .then(response => response.json())
                 .then(data => {
-                    cardInfoData = data;
                     for (const [key, value] of Object.entries(data.data)) {
                         if (isNonEmpty(value)) {
                             lightboxDescription.innerHTML += `<h2>${key.replace(/_/g, ' ').toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</h2> ${value}<br>`;
