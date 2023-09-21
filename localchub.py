@@ -1,4 +1,4 @@
-import os, json, base64, requests, re, random
+import os, json, base64, requests, re, random, argparse, time, threading
 from flask import Flask, render_template, request, send_from_directory, jsonify, Response
 from PIL import Image, UnidentifiedImageError
 
@@ -6,6 +6,18 @@ app = Flask(__name__)
 
 CARDS_PER_PAGE = 50
 CARD_PREVIEW_SIZE = (300, 300)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--autoupdate', type=int, default=60, nargs='?', const=60, help='Auto-update interval in seconds')
+args = parser.parse_args()
+autoupdMode = hasattr(args, 'autoupdate')
+autoupdThread = None
+def autoUpdate(seconds=args.autoupdate):
+    while True:
+        print('[autoupdate] Updating cards..')
+        time.sleep(1)
+        requests.get('http://127.0.0.1:1488/sync')
+        time.sleep(seconds)
 
 def deleteCard(cardId):
     for ext in ['png', 'json']:
@@ -74,8 +86,7 @@ def getCardList(page, query=None, searchType='basic'):
                 randomTags.update(metadata['topics'])
                 cards.append(createCardEntry(metadata))
 
-    randomTags = random.choices(list(randomTags), k=10)
-
+    randomTags = random.choices(list(randomTags), k=10) # randomTags = random.sample(list(randomTags), min(10, len(randomTags)))
     return cards, count, randomTags
 
 def blacklistAdd(cardId):
@@ -186,4 +197,9 @@ def edit_tags(cardId):
         return jsonify({'message': str(e)}), 500
 
 if __name__ == '__main__':
+    if autoupdMode:
+        autoupdThread = threading.Thread(target=autoUpdate)
+        autoupdThread.daemon = True
+        autoupdThread.start()
+
     app.run(debug=True, port=1488)
