@@ -7,10 +7,22 @@ app = Flask(__name__)
 CARDS_PER_PAGE = 50
 CARD_PREVIEW_SIZE = (300, 300)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
+parser.add_argument('--synctags', action='store_true', default=False, help='Enable tag synchronization')
+args = parser.parse_args()
+autoupdInterval = args.autoupdate
+autoupdMode = args.autoupdate is not None
+synctagsMode = args.synctags
+autoupdThread = None
+
 def autoUpdate():
     while True:
         print(f'[autoupdate/{autoupdInterval}s] Updating cards..')
-        requests.get('http://127.0.0.1:1488/sync')
+        try:
+            requests.get('http://127.0.0.1:1488/sync')
+        except requests.ConnectionError:
+            pass
         time.sleep(autoupdInterval)
 
 def deleteCard(cardId):
@@ -131,6 +143,7 @@ def syncCards():
             if card['topics'] != getCardMetadata(card['id'])['topics']:
                 with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
                     f.write(json.dumps(card, indent=4))
+                    print(f'Updating tags for {card["name"]} ({cardId})..')
 
         if card['createdAt'] != card['lastActivityAt'] and os.path.exists(f'static/{cardId}.json'):
             if card['lastActivityAt'] != getCardMetadata(card['id'])['lastActivityAt']:
@@ -196,15 +209,6 @@ def edit_tags(cardId):
         return jsonify({'message': str(e)}), 500
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
-    parser.add_argument('--synctags', action='store_true', default=False, help='Enable tag synchronization')
-    args = parser.parse_args()
-    autoupdInterval = args.autoupdate
-    autoupdMode = args.autoupdate is not None
-    synctagsMode = args.synctags
-    autoupdThread = None
-
     if autoupdMode:
         autoupdThread = threading.Thread(target=autoUpdate)
         autoupdThread.daemon = True
