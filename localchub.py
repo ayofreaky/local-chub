@@ -7,19 +7,11 @@ app = Flask(__name__)
 CARDS_PER_PAGE = 50
 CARD_PREVIEW_SIZE = (300, 300)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
-args = parser.parse_args()
-autoupdInterval = args.autoupdate
-autoupdMode = args.autoupdate is not None
-autoupdThread = None
 def autoUpdate():
-    if autoupdMode:
-        while True:
-            print(f'[autoupdate][{autoupdInterval}s] Updating cards..')
-            time.sleep(1)
-            requests.get('http://127.0.0.1:1488/sync')
-            time.sleep(autoupdInterval)
+    while True:
+        print(f'[autoupdate/{autoupdInterval}s] Updating cards..')
+        requests.get('http://127.0.0.1:1488/sync')
+        time.sleep(autoupdInterval)
 
 def deleteCard(cardId):
     for ext in ['png', 'json']:
@@ -199,6 +191,13 @@ def edit_tags(cardId):
         return jsonify({'message': str(e)}), 500
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
+    args = parser.parse_args()
+    autoupdInterval = args.autoupdate
+    autoupdMode = args.autoupdate is not None
+    autoupdThread = None
+
     if autoupdMode:
         autoupdThread = threading.Thread(target=autoUpdate)
         autoupdThread.daemon = True
