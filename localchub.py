@@ -8,16 +8,18 @@ CARDS_PER_PAGE = 50
 CARD_PREVIEW_SIZE = (300, 300)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--autoupdate', type=int, default=60, nargs='?', const=60, help='Auto-update interval in seconds')
+parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
 args = parser.parse_args()
-autoupdMode = hasattr(args, 'autoupdate')
+autoupdInterval = args.autoupdate
+autoupdMode = args.autoupdate is not None
 autoupdThread = None
-def autoUpdate(seconds=args.autoupdate):
-    while True:
-        print('[autoupdate] Updating cards..')
-        time.sleep(1)
-        requests.get('http://127.0.0.1:1488/sync')
-        time.sleep(seconds)
+def autoUpdate():
+    if autoupdMode:
+        while True:
+            print(f'[autoupdate][{autoupdInterval}s] Updating cards..')
+            time.sleep(1)
+            requests.get('http://127.0.0.1:1488/sync')
+            time.sleep(autoupdInterval)
 
 def deleteCard(cardId):
     for ext in ['png', 'json']:
