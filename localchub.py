@@ -127,6 +127,11 @@ def syncCards():
         nonlocal newCards, currCard
         cardId = card['id']
         pTask = 'Downloading'
+        if synctagsMode and os.path.exists(f'static/{cardId}.json') and len(card['topics']) > 0:
+            if card['topics'] != getCardMetadata(card['id'])['topics']:
+                with open(f'static/{cardId}.json', 'w', encoding='utf-8') as f:
+                    f.write(json.dumps(card, indent=4))
+
         if card['createdAt'] != card['lastActivityAt'] and os.path.exists(f'static/{cardId}.json'):
             if card['lastActivityAt'] != getCardMetadata(card['id'])['lastActivityAt']:
                 try:
@@ -193,9 +198,11 @@ def edit_tags(cardId):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
+    parser.add_argument('--synctags', action='store_true', default=False, help='Enable tag synchronization')
     args = parser.parse_args()
     autoupdInterval = args.autoupdate
     autoupdMode = args.autoupdate is not None
+    synctagsMode = args.synctags
     autoupdThread = None
 
     if autoupdMode:
