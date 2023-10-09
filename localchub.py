@@ -10,10 +10,12 @@ CARD_PREVIEW_SIZE = (300, 300)
 parser = argparse.ArgumentParser()
 parser.add_argument('--autoupdate', type=int, default=None, nargs='?', const=60, help='Auto-update interval in seconds')
 parser.add_argument('--synctags', action='store_true', default=False, help='Enable tag synchronization')
+parser.add_argument('--backup', action='store_true', default=False, help='Backup old cards to /backup')
 args = parser.parse_args()
 autoupdInterval = args.autoupdate
 autoupdMode = args.autoupdate is not None
 synctagsMode = args.synctags
+backupMode = args.backup
 autoupdThread = None
 
 def autoUpdate():
@@ -150,9 +152,10 @@ def syncCards():
                 try:
                     cardIds.remove(cardId)
                     pTask = 'Updating'
-                    if not os.path.exists('backup'): os.mkdir('backup')
-                    for ext in ['png', 'json']: # make a backup jic
-                        os.rename(f'static/{cardId}.{ext}', f'backup/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
+                    if backupMode:
+                        if not os.path.exists('backup'): os.mkdir('backup')
+                        for ext in ['png', 'json']:
+                            os.rename(f'static/{cardId}.{ext}', f'backup/{cardId}_{getCardMetadata(card["id"])["lastActivityAt"].split("T")[0]}.{ext}')
                 except Exception as e:
                     print(e, cardId)
 
