@@ -1,4 +1,4 @@
-import os, json, base64, requests, re, random, argparse, time, threading
+import os, json, base64, requests, re, random, argparse, time, threading, datetime
 from flask import Flask, render_template, request, send_from_directory, jsonify, Response
 from PIL import Image, UnidentifiedImageError
 
@@ -57,7 +57,8 @@ def createCardEntry(metadata):
         'description': metadata['description'].replace('Creator\'s notes go here.', '\n'),
         'topics': [topic for topic in metadata['topics'] if topic != 'ROOT'],
         'imagePath': f'static/{metadata["id"]}.png',
-        'tokenCount': metadata['nTokens']
+        'tokenCount': metadata['nTokens'],
+        'lastActivityAt': datetime.datetime.strptime(metadata['lastActivityAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y %H:%M")
     }
 
 def getCardList(page, query=None, searchType='basic'):

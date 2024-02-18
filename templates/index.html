@@ -392,7 +392,7 @@
                 <button class='action-button copy-json-button' onclick="copyJSON('{{ card.id }}', this)" title="Copy JSON">📋</button>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
-                    <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
+                    <h3 title='{{ card.lastActivityAt }}' onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
                     <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens</p>
                     <br>
                     <p id='descr'>
@@ -426,8 +426,9 @@
                 <button class='action-button copy-json-button' onclick="copyJSON('{{ card.id }}', this)" title="Copy JSON">📋</button>
                 <img src='{{ card.imagePath }}' alt='{{ card.name }}' class='card-image' title='Click for details'>
                 <div class='card-content'>
-                    <h3 onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
+                    <h3 title='{{ card.lastActivityAt }}' onclick="showLightbox('{{ card.imagePath }}', '{{ card.description }}', '{{ card.id }}')">{{ card.name }}</h3>
                     <p>by <a href='?query={{ card.author }}&type=author' title='Browse all cards by {{ card.author }}'>{{ card.author }}</a> | {{ card.tokenCount }} tokens<br></p>
+                    <!-- <p>{{ card.lastActivityAt }}</p> -->
                     <br>
                     <p id='descr'>
                         {% if card.tagline|length > 1 %}
