@@ -482,6 +482,7 @@
 
     <div id='sidebar'>
         <!-- <button class='sidebar-container' title='Open settings'>≡</button> -->
+        <button onclick='toggleBlur()' class='sidebar-container' title='Toggle NSFW blurring'>🍆</button>
         <button onclick='toggleCompactMode()' class='sidebar-container' title='Toggle compact mode'>⇳</button>
         <button onclick='toggleDarkMode()' class='sidebar-container' title='Toggle dark mode'>🌓︎</button>
         <button onclick='scrollToTop()' class='sidebar-container' title='Scroll to top'>⬆</button>
@@ -504,6 +505,32 @@
             const isDarkMode = body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDarkMode.toString());
         }
+
+        let blurNSFW = localStorage.getItem('blurNSFW') === 'true';
+
+        function toggleBlur() {
+            blurNSFW = !blurNSFW;
+            localStorage.setItem('blurNSFW', blurNSFW);
+            applyBlurringPreference();
+        }
+
+        function applyBlurringPreference() {
+            const cardContainers = document.querySelectorAll('.card-container');
+
+            cardContainers.forEach(cardContainer => {
+                const tagsLinks = cardContainer.querySelectorAll('#tags a');
+                const containsNSFW = Array.from(tagsLinks).some(tagLink => tagLink.textContent.trim() === 'NSFW');
+                const cardImage = cardContainer.querySelector('.card-image');
+
+                if (!cardImage) {
+                    return;
+                }
+
+                cardImage.style.filter = blurNSFW && containsNSFW ? 'blur(12px)' : 'none';
+            });
+        }
+
+        applyBlurringPreference();
 
         function downloadImage(imagePath, cardName) {
             let cardId = imagePath.split('/').pop().split('.').shift();
