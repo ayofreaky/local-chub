@@ -482,9 +482,9 @@
 
     <div id='sidebar'>
         <!-- <button class='sidebar-container' title='Open settings'>≡</button> -->
-        <button onclick='toggleBlur()' class='sidebar-container' title='Toggle NSFW blurring'>🍆</button>
-        <button onclick='toggleCompactMode()' class='sidebar-container' title='Toggle compact mode'>⇳</button>
-        <button onclick='toggleDarkMode()' class='sidebar-container' title='Toggle dark mode'>🌓︎</button>
+        <button onclick='toggleBlur()' class='sidebar-container' id='nsfwToggle' title='Toggle NSFW blurring'>😈</button>
+        <button onclick='toggleCompactMode()' class='sidebar-container' id='compactToggle' title='Toggle compact mode'>⇳</button>
+        <button onclick='toggleDarkMode()' class='sidebar-container' id='darkModeToggle' title='Toggle dark mode'>🌓︎</button>
         <button onclick='scrollToTop()' class='sidebar-container' title='Scroll to top'>⬆</button>
         <button onclick='scrollToBottom()' class='sidebar-container' title='Scroll to bottom'>⬇</button>
     </div>
@@ -508,10 +508,18 @@
 
         let blurNSFW = localStorage.getItem('blurNSFW') === 'true';
 
+        function updateNSFWToggle() {
+            const toggleButton = document.getElementById('nsfwToggle');
+            if (toggleButton) {
+                toggleButton.innerHTML = blurNSFW ? '😇' : '😈';
+            }
+        }
+
         function toggleBlur() {
             blurNSFW = !blurNSFW;
-            localStorage.setItem('blurNSFW', blurNSFW);
             applyBlurringPreference();
+            updateNSFWToggle();
+            localStorage.setItem('blurNSFW', blurNSFW);
         }
 
         function applyBlurringPreference() {
